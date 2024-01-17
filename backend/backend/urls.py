@@ -16,7 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from ap_monitor.views import ListDevices, DeleteDevice, UpdateDevices, AddDevice
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('devices/', ListDevices.as_view()),
+    path('delete/', DeleteDevice.as_view()),
+    path('update/', UpdateDevices.as_view()),
+    path('add/', AddDevice.as_view()),
 ]
+

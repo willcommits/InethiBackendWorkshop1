@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import NetworkDevice
+
+
+@admin.register(NetworkDevice)
+class NetworkDeviceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'device_type', 'ip_address')
