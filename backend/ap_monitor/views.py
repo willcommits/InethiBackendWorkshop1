@@ -19,7 +19,7 @@ class AddDevice(APIView):
                 ip_address=data.get('ip_address')
             )
 
-            # update_prometheus_targets([device.ip_address])
+            update_prometheus_targets([device.ip_address])
 
             return Response({"status": "success", "message": "Device added successfully."})
 
@@ -50,9 +50,9 @@ class UpdateDevices(APIView):
             device.save()
 
             # Optionally, update Prometheus targets if IP address has changed
-            # if old_ip_address != device.ip_address:
-            #     remove_prometheus_targets([old_ip_address])
-            #     update_prometheus_targets([device.ip_address])
+            if old_ip_address != device.ip_address:
+                remove_prometheus_targets([old_ip_address])
+                update_prometheus_targets([device.ip_address])
 
             return Response({"status": "success", "message": "Device updated successfully."})
 
@@ -76,7 +76,7 @@ class DeleteDevice(APIView):
                 return Response({"status": "error", "message": "Device not found."}, status=status.HTTP_404_NOT_FOUND)
 
             # Remove the IP address from the YAML file
-            # remove_prometheus_targets([ip_address])
+            remove_prometheus_targets([ip_address])
 
             # Delete the device from the database if it was removed from file
             device.delete()
