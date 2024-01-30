@@ -26,6 +26,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = ['*']
+
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # Application definition
