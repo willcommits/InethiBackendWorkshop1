@@ -26,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://manage.inethilocal.net']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://manage.inethilocal.net', 'https://manage-backend.inethilocal.net']
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
