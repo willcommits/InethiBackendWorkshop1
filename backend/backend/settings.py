@@ -174,7 +174,7 @@ KEYCLOAK_CONFIG = {
     # Flag if the token should be introspected or decoded (default is False)
     'DECODE_TOKEN': False,
     # Flag if the audience in the token should be verified (default is True)
-    'VERIFY_AUDIENCE': False,
+    'VERIFY_AUDIENCE': True,
     # Flag if the user info has been included in the token (default is True)
     'USER_INFO_IN_TOKEN': True,
     # Flag to show the traceback of debug logs (default is False)
