@@ -161,12 +161,12 @@ KEYCLOAK_CONFIG = {
 
     'REALM': 'master',
     # The ID of this client in the above Keycloak realm
-    'CLIENT_ID': 'backend',
+    'CLIENT_ID': 'manage-backend',
     # The secret for this confidential client
     # replace with your own
-    'CLIENT_SECRET_KEY': 'Z1QZahXeauSFn0psjisvh6hQLfd7VtMZ',
+    'CLIENT_SECRET_KEY': 'wOF6hxuR4OMdyDLlwQXSSUfLPwprh8DG',
     # The name of the admin role for the client
-    'CLIENT_ADMIN_ROLE': 'admin',
+    'CLIENT_ADMIN_ROLE': 'backend-admin',
     # The name of the admin role for the realm
     'REALM_ADMIN_ROLE': 'admin',
     # Regex formatted URLs to skip authentication
