@@ -147,7 +147,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "django_keycloak.KeycloakUserAutoId"
 KEYCLOAK_CONFIG = {
     # Keycloak's Public Server URL (e.g. http://localhost:8080)
-    'SERVER_URL': 'http://inethi-keycloak:8080',
+    'SERVER_URL': 'https://keycloak.inethilocal.net',
     # Keycloak's Internal URL
     # (e.g. http://keycloak:8080 for a docker service named keycloak)
     # Optional: Default is SERVER_URL
@@ -174,7 +174,7 @@ KEYCLOAK_CONFIG = {
     # Flag if the token should be introspected or decoded (default is False)
     'DECODE_TOKEN': False,
     # Flag if the audience in the token should be verified (default is True)
-    'VERIFY_AUDIENCE': True,
+    'VERIFY_AUDIENCE': False,
     # Flag if the user info has been included in the token (default is True)
     'USER_INFO_IN_TOKEN': True,
     # Flag to show the traceback of debug logs (default is False)
