@@ -151,7 +151,7 @@ KEYCLOAK_CONFIG = {
     # Keycloak's Internal URL
     # (e.g. http://keycloak:8080 for a docker service named keycloak)
     # Optional: Default is SERVER_URL
-    'INTERNAL_URL': 'https://keycloak.inethilocal.net',
+    'INTERNAL_URL': 'http://inethi-keycloak:8080',
     # Override for default Keycloak's base path
     # Default is '/auth/'
 
