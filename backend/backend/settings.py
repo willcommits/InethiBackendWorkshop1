@@ -147,7 +147,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "django_keycloak.KeycloakUserAutoId"
 KEYCLOAK_CONFIG = {
     # Keycloak's Public Server URL (e.g. http://localhost:8080)
-    'SERVER_URL': 'https://keycloak.inethilocal.net',
+    'SERVER_URL': 'http://inethi-keycloak:8080',
     # Keycloak's Internal URL
     # (e.g. http://keycloak:8080 for a docker service named keycloak)
     # Optional: Default is SERVER_URL
