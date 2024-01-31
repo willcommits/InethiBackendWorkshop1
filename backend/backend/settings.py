@@ -164,7 +164,7 @@ KEYCLOAK_CONFIG = {
     'CLIENT_ID': 'backend',
     # The secret for this confidential client
     # replace with your own
-    'CLIENT_SECRET_KEY': '7P7HJJh96VXZoFFvDRLauzSqp5zevUYU',
+    'CLIENT_SECRET_KEY': 'Z1QZahXeauSFn0psjisvh6hQLfd7VtMZ',
     # The name of the admin role for the client
     'CLIENT_ADMIN_ROLE': 'admin',
     # The name of the admin role for the realm
