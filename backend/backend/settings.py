@@ -166,7 +166,7 @@ KEYCLOAK_CONFIG = {
     # replace with your own
     'CLIENT_SECRET_KEY': 'wOF6hxuR4OMdyDLlwQXSSUfLPwprh8DG',
     # The name of the admin role for the client
-    'CLIENT_ADMIN_ROLE': 'admin',
+    'CLIENT_ADMIN_ROLE': 'backend-admin',
     # The name of the admin role for the realm
     'REALM_ADMIN_ROLE': 'admin',
     # Regex formatted URLs to skip authentication
