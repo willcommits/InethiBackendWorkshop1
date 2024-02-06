@@ -5,19 +5,10 @@ from rest_framework import status
 from .models import NetworkDevice
 from .utilities import update_prometheus_targets, remove_prometheus_targets
 import json
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
-class TestAuthView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        # This view should only be accessible if the user is authenticated
-        return Response({"message": "You are authenticated!"})
 
 class AddDevice(APIView):
-    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         data = request.data
         try:
@@ -37,7 +28,7 @@ class AddDevice(APIView):
 
 
 class UpdateDevices(APIView):
-    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -70,7 +61,7 @@ class UpdateDevices(APIView):
 
 
 class DeleteDevice(APIView):
-    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             ip_address = request.data.get('ip_address')
@@ -99,7 +90,7 @@ class DeleteDevice(APIView):
 
 
 class ListDevices(APIView):
-    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         devices = NetworkDevice.objects.all()
         data = [{"name": device.name, "device_type": device.device_type, "ip_address": device.ip_address} for device in

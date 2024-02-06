@@ -26,12 +26,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://manage.inethilocal.net', 'https://manage-backend.inethilocal.net']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://manage.inethilocal.net']
 
-CORS_ALLOWED_ORIGINS = [
-    "https://manage.inethilocal.net",
-
-]
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # Application definition
 
@@ -45,15 +42,7 @@ INSTALLED_APPS = [
     'ap_monitor',
     'rest_framework',
     'corsheaders',
-    'django_keycloak',
 ]
-
-REST_FRAMEWORK = {
-    # ... other rest framework settings.
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'django_keycloak.authentication.KeycloakAuthentication'
-    ],
-}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -64,9 +53,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'corsheaders.middleware.CorsMiddleware',
-    'django_keycloak.middleware.KeycloakMiddleware',
 ]
-AUTHENTICATION_BACKENDS = ('django_keycloak.backends.KeycloakAuthenticationBackend',)
+
 ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
@@ -144,41 +132,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-AUTH_USER_MODEL = "django_keycloak.KeycloakUserAutoId"
-KEYCLOAK_CONFIG = {
-    # Keycloak's Public Server URL (e.g. http://localhost:8080)
-    'SERVER_URL': 'https://keycloak.inethilocal.net',
-    # Keycloak's Internal URL
-    # (e.g. http://keycloak:8080 for a docker service named keycloak)
-    # Optional: Default is SERVER_URL
-    'INTERNAL_URL': 'http://inethi-keycloak:8080',
-    # Override for default Keycloak's base path
-    # Default is '/auth/'
-
-    'BASE_PATH': '/auth/',
-    # The name of the Keycloak's realm
-
-
-    'REALM': 'master',
-    # The ID of this client in the above Keycloak realm
-    'CLIENT_ID': 'manage-backend',
-    # The secret for this confidential client
-    # replace with your own
-    'CLIENT_SECRET_KEY': 'wOF6hxuR4OMdyDLlwQXSSUfLPwprh8DG',
-    # The name of the admin role for the client
-    'CLIENT_ADMIN_ROLE': 'backend-admin',
-    # The name of the admin role for the realm
-    'REALM_ADMIN_ROLE': 'admin',
-    # Regex formatted URLs to skip authentication
-    'EXEMPT_URIS': [],
-    # Flag if the token should be introspected or decoded (default is False)
-    'DECODE_TOKEN': False,
-    # Flag if the audience in the token should be verified (default is True)
-    'VERIFY_AUDIENCE': False,
-    # Flag if the user info has been included in the token (default is True)
-    'USER_INFO_IN_TOKEN': True,
-    # Flag to show the traceback of debug logs (default is False)
-    'TRACE_DEBUG_LOGS': False,
-    # The token prefix that is expected in Authorization header (default is 'Bearer')
-    'TOKEN_PREFIX': 'Bearer'
-}
