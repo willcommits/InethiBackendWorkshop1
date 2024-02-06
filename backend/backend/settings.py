@@ -26,12 +26,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Update CSRF_TRUSTED_ORIGINS to include your React app's domain
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://manage.inethilocal.net']
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+# CORS settings for development. For production, consider specifying CORS_ALLOWED_ORIGINS.
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # For development
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ['authorization', 'content-type']
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -44,7 +47,10 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -52,7 +58,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -112,6 +118,19 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+KEYCLOAK_PUBLIC_KEY = """
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlkQhwMqmNa7nybX9YC3B
+fCP/xW+aYSHlwqCKq0Gu+4/i16Zn/pYU050iVCiT7Dz3pZJv1e/IF+jMsRmxgEIA
+w7hJ2Q+q4BgWBi2U951ZZOFbc7XRbJTJG1WEym5u0WZKhNW7CfaXEdkpZE0rYvAQ
+kKxBABeeAzfc8JAuHsRL2x+1mbcSe3ilWK0m95/N0xOKS3nHV9L93mVD2fmwWJIz
+3PAeReQLKvjfgnTOgVM6eqatur3V8lUj6GCo3/HK8xDwYf7AejKoscrQM8oUuh7H
+qbHcRYq3BG2Qt6hBp0TQa6S2edo+ROdCVQFf5h2jcZOLuze/oUJEL/FSmIKTe6LF
+RwIDAQAB
+-----END PUBLIC KEY-----
+"""
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
