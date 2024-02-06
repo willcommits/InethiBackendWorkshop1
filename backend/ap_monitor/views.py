@@ -11,7 +11,7 @@ from .permissions import IsAdminUser
 
 
 class AddDevice(APIView):
-
+    permission_classes = [IsAdminUser]
     def post(self, request):
         data = request.data
         try:
@@ -31,7 +31,7 @@ class AddDevice(APIView):
 
 
 class UpdateDevices(APIView):
-
+    permission_classes = [IsAdminUser]
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -64,7 +64,7 @@ class UpdateDevices(APIView):
 
 
 class DeleteDevice(APIView):
-
+    permission_classes = [IsAdminUser]
     def post(self, request):
         try:
             ip_address = request.data.get('ip_address')
