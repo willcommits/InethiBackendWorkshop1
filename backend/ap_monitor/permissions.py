@@ -11,14 +11,14 @@ class IsAdminUser(BasePermission):
     def has_permission(self, request, view):
         # Extract the token from the Authorization header
         auth = request.headers.get('Authorization', None)
-        print(auth)
+        # print(auth)
         if auth:
             token = auth.split()[1]
 
             try:
                 # Decode the token
                 key = settings.KEYCLOAK_PUBLIC_KEY  # You need to add your Keycloak public key in settings
-                decoded_token = jwt.decode(token, key, algorithms=['RS256'], audience='manage-backend')
+                decoded_token = jwt.decode(token, key, algorithms=['RS256'], audience='manage-ui')
 
                 # Check if the admin role is present in the token
                 roles = decoded_token.get('realm_access', {}).get('roles', [])
