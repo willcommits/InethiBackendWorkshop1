@@ -17,10 +17,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from ap_monitor.views import ListDevices, DeleteDevice, UpdateDevices, AddDevice
+from service_monitor.views import ListServices, AddService
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('devices/', ListDevices.as_view()),
     path('delete/', DeleteDevice.as_view()),
     path('update/', UpdateDevices.as_view()),
     path('add/', AddDevice.as_view()),
+    path('service/list/', ListServices.as_view()),
+    path('service/add/', AddService.as_view()),
 ]
