@@ -16,6 +16,6 @@ class Service(models.Model):
     )
 
     url = models.URLField(max_length=100, unique=True)
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=20, unique=True)
     service_type = models.CharField(max_length=20, choices=SERVICE_TYPES)
     api_location = models.CharField(max_length=10, choices=API_LOCATIONS)

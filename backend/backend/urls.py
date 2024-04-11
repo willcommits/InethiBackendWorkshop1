@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from ap_monitor.views import ListDevices, DeleteDevice, UpdateDevices, AddDevice
-from service_monitor.views import ListServices, AddService
+from service_monitor.views import ListServices, AddService, DeleteService, EditService
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('devices/', ListDevices.as_view()),
@@ -26,4 +26,6 @@ urlpatterns = [
     path('add/', AddDevice.as_view()),
     path('service/list/', ListServices.as_view()),
     path('service/add/', AddService.as_view()),
+    path('service/delete/<str:service_name>/', DeleteService.as_view(), name='delete_service'),
+    path('service/edit/<str:service_name>/', EditService.as_view(), name='edit_service'),
 ]
