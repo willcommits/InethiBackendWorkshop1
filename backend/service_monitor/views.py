@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.shortcuts import render
 from rest_framework.views import APIView, Response
 from rest_framework import status
@@ -12,6 +14,28 @@ class ListServices(APIView):
         services = Service.objects.all()
         data = [{'name': s.name, 'url': s.url, 'service_type': s.service_type, 'api_location': s.api_location} for s in
                 services]
+        return Response({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
+
+
+class ListServicesByType(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        # Using defaultdict to automatically handle new service types
+        services_by_type = defaultdict(list)
+
+        # Query all services
+        services = Service.objects.all()
+
+        # Organize services by their type
+        for service in services:
+            services_by_type[service.get_service_type_display()].append({
+                'name': service.name,
+                'url': service.url,
+            })
+
+        # Convert defaultdict to regular dict for serialization
+        data = dict(services_by_type)
         return Response({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
 
 
