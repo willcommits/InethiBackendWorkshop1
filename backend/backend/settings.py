@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'service_monitor',
     'ap_monitor',
+    'users',
+    'payments',
     'rest_framework',
     'corsheaders',
 ]
@@ -92,6 +94,13 @@ WSGI_APPLICATION = "backend.wsgi.application"
 #     }
 # }
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -123,13 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 KEYCLOAK_PUBLIC_KEY = """
 -----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlkQhwMqmNa7nybX9YC3B
-fCP/xW+aYSHlwqCKq0Gu+4/i16Zn/pYU050iVCiT7Dz3pZJv1e/IF+jMsRmxgEIA
-w7hJ2Q+q4BgWBi2U951ZZOFbc7XRbJTJG1WEym5u0WZKhNW7CfaXEdkpZE0rYvAQ
-kKxBABeeAzfc8JAuHsRL2x+1mbcSe3ilWK0m95/N0xOKS3nHV9L93mVD2fmwWJIz
-3PAeReQLKvjfgnTOgVM6eqatur3V8lUj6GCo3/HK8xDwYf7AejKoscrQM8oUuh7H
-qbHcRYq3BG2Qt6hBp0TQa6S2edo+ROdCVQFf5h2jcZOLuze/oUJEL/FSmIKTe6LF
-RwIDAQAB
+ENTER YOUR PUB KEY
 -----END PUBLIC KEY-----
 """
 
