@@ -1,2 +1,5 @@
 *.pyc
 .vscode/
+.venv/
+db.sqlite3
+keycloak.cert
