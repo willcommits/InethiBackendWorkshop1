@@ -113,12 +113,17 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
 KEYCLOAK_PUBLIC_KEY: str | None = None
 try:
     with open(BASE_DIR / "keycloak.cert", "r", encoding="utf-8") as kc_cert_f:
         KEYCLOAK_PUBLIC_KEY = kc_cert_f.read()
 except FileNotFoundError:
     KEYCLOAK_PUBLIC_KEY = None
+
+PROMETHEUS_USERNAME = env('PROMETHEUS_USERNAME')
+PROMETHEUS_PASSWORD = env('PROMETHEUS_PASSWORD')
+PROMETHEUS_URL = env('PROMETHEUS_URL')
 
 
 # Internationalization
