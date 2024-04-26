@@ -28,7 +28,7 @@ def sync_prometheus_data_to_yml():
     # Find the 'blackbox' job, append new IPs to its targets while avoiding duplicates
     for job in prometheus_data.get('scrape_configs', []):
         if job['job_name'] == 'blackbox':
-            current_targets = set(job['static_configs'][0]['targets'])
+            current_targets = set(job['static_configs'][0]['targets'] or [])
             updated_targets = current_targets.union(ip_addresses)
             job['static_configs'][0]['targets'] = list(updated_targets)
             break
