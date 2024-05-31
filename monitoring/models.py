@@ -40,3 +40,25 @@ class Service(models.Model):
     name = models.CharField(max_length=20, unique=True)
     service_type = models.CharField(max_length=20, choices=SERVICE_TYPES)
     api_location = models.CharField(max_length=10, choices=API_LOCATIONS)
+
+
+class Alert(models.Model):
+    """Alert sent to network managers."""
+
+    ALERT_CATEGORIES = (
+        ('node_down', 'Node Down'),
+        ('node_up', 'Node Up'),
+        ('unknown', 'Unknown')
+    )
+
+    ALERT_TYPES = (
+        ('error', 'Error'),
+        ('warning', 'Warning'),
+        ('info', 'Info'),
+        ('success', 'Success')
+    )
+
+    category = models.CharField(max_length=20, choices=ALERT_CATEGORIES)
+    type = models.CharField(max_length=10, choices=ALERT_TYPES)
+    text = models.CharField(max_length=100)
+    created_time = models.DateTimeField(auto_now_add=True)

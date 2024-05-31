@@ -1,8 +1,8 @@
 
 from rest_framework.viewsets import ModelViewSet
 
-from .models import NetworkDevice, Service
-from .serializers import NetworkDeviceSerializer, ServiceSerializer
+from .models import NetworkDevice, Service, Alert
+from .serializers import NetworkDeviceSerializer, ServiceSerializer, AlertSerializer
 
 
 class NetworkDeviceViewSet(ModelViewSet):
@@ -18,3 +18,10 @@ class ServiceViewSet(ModelViewSet):
 
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
+
+
+class AlertsViewSet(ModelViewSet):
+    """View/Edit/Add/Delete Alert items."""
+
+    queryset = Alert.objects.all()
+    serializer_class = AlertSerializer
