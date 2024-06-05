@@ -36,7 +36,6 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # For development
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ['authorization', 'content-type']
 # Application definition
 INSTALLED_APPS = [
     "daphne",
@@ -51,12 +50,13 @@ INSTALLED_APPS = [
     'payments',
     'rest_framework',
     'corsheaders',
+    'django_keycloak'
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -98,6 +98,15 @@ if DEBUG:
 else:
     DATABASES = { "default": env.db() }
 
+# Keycloak config
+AUTHENTICATION_BACKENDS = [
+    'django_keycloak.backends.KeycloakAuthorizationCodeBackend'
+]
+LOGIN_URL = 'keycloak_login'
+AUTH_USER_MODEL = "django_keycloak.KeycloakUser"
+KEYCLOAK_CLIENT_DEFAULT = "manage-backend"
+KEYCLOAK_CLIENT_API = "manage-ui"
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -116,17 +125,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-KEYCLOAK_PUBLIC_KEY: str | None = None
-try:
-    with open(BASE_DIR / "keycloak.cert", "r", encoding="utf-8") as kc_cert_f:
-        KEYCLOAK_PUBLIC_KEY = kc_cert_f.read()
-except FileNotFoundError:
-    KEYCLOAK_PUBLIC_KEY = None
-
 PROMETHEUS_USERNAME = env('PROMETHEUS_USERNAME')
 PROMETHEUS_PASSWORD = env('PROMETHEUS_PASSWORD')
 PROMETHEUS_URL = env('PROMETHEUS_URL')
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'django_keycloak.backends.KeycloakDRFAuthentication',
+    ]
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
