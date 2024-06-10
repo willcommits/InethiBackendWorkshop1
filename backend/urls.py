@@ -23,5 +23,6 @@ urlpatterns = [
     path("admin/login/", lambda request: redirect("keycloak_login")),
     path("admin/", admin.site.urls),
     path("monitoring/", include("monitoring.urls")),
+    path("rd/", include("syncradius.urls")),
     path("keycloak/", include("django_keycloak.urls")),
 ]

@@ -8,7 +8,8 @@
 from django.db import models
 
 
-class AccelArrivals(models.Model):
+class AccelArrival(models.Model):
+
     mac = models.CharField(max_length=255)
     vendor = models.CharField(max_length=255, blank=True, null=True)
     last_contact = models.DateTimeField(blank=True, null=True)
@@ -21,8 +22,9 @@ class AccelArrivals(models.Model):
         db_table = 'accel_arrivals'
 
 
-class AccelProfileEntries(models.Model):
-    accel_profile_id = models.IntegerField()
+class AccelProfileEntry(models.Model):
+
+    accel_profile = models.ForeignKey("AccelProfile", on_delete=models.CASCADE)
     section = models.CharField(max_length=255)
     item = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
@@ -35,8 +37,9 @@ class AccelProfileEntries(models.Model):
         db_table = 'accel_profile_entries'
 
 
-class AccelProfiles(models.Model):
-    cloud_id = models.IntegerField()
+class AccelProfile(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     base_config = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -47,9 +50,10 @@ class AccelProfiles(models.Model):
         db_table = 'accel_profiles'
 
 
-class AccelServers(models.Model):
-    cloud_id = models.IntegerField()
-    accel_profile_id = models.IntegerField()
+class AccelServer(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.CASCADE)
+    accel_profile = models.ForeignKey("AccelProfile", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     mac = models.CharField(max_length=255)
     pppoe_interface = models.CharField(max_length=10)
@@ -67,8 +71,9 @@ class AccelServers(models.Model):
         db_table = 'accel_servers'
 
 
-class AccelSessions(models.Model):
-    accel_server_id = models.IntegerField()
+class AccelSession(models.Model):
+
+    accel_server = models.ForeignKey("AccelServer", on_delete=models.CASCADE)
     netns = models.CharField(max_length=255)
     vrf = models.CharField(max_length=255)
     ifname = models.CharField(max_length=255)
@@ -102,8 +107,9 @@ class AccelSessions(models.Model):
         db_table = 'accel_sessions'
 
 
-class AccelStats(models.Model):
-    accel_server_id = models.IntegerField()
+class AccelStat(models.Model):
+
+    accel_server = models.ForeignKey("AccelServer", on_delete=models.CASCADE)
     version = models.CharField(max_length=255)
     uptime = models.CharField(max_length=255)
     cpu = models.CharField(max_length=255)
@@ -122,8 +128,9 @@ class AccelStats(models.Model):
         db_table = 'accel_stats'
 
 
-class Actions(models.Model):
-    na_id = models.IntegerField()
+class Action(models.Model):
+
+    na = models.ForeignKey("Na", on_delete=models.CASCADE)
     action = models.CharField(max_length=7, blank=True, null=True)
     command = models.CharField(max_length=500, blank=True, null=True)
     status = models.CharField(max_length=8, blank=True, null=True)
@@ -135,15 +142,16 @@ class Actions(models.Model):
         db_table = 'actions'
 
 
-class Alerts(models.Model):
+class Alert(models.Model):
+
     description = models.CharField(max_length=255)
-    node_id = models.IntegerField(blank=True, null=True)
-    mesh_id = models.IntegerField(blank=True, null=True)
-    ap_id = models.IntegerField(blank=True, null=True)
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     detected = models.DateTimeField()
     acknowledged = models.DateTimeField(blank=True, null=True)
-    user_id = models.IntegerField(blank=True, null=True)
+    user = models.ForeignKey("User", on_delete=models.SET_NULL, blank=True, null=True)
     resolved = models.DateTimeField(blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
@@ -153,8 +161,9 @@ class Alerts(models.Model):
         db_table = 'alerts'
 
 
-class ApActions(models.Model):
-    ap_id = models.IntegerField()
+class ApAction(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.CASCADE)
     action = models.CharField(max_length=17, blank=True, null=True)
     command = models.CharField(max_length=500, blank=True, null=True)
     status = models.CharField(max_length=8, blank=True, null=True)
@@ -167,9 +176,10 @@ class ApActions(models.Model):
         db_table = 'ap_actions'
 
 
-class ApApProfileEntries(models.Model):
-    ap_id = models.IntegerField()
-    ap_profile_entry_id = models.IntegerField()
+class ApApProfileEntry(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.CASCADE)
+    ap_profile_entry = models.ForeignKey("ApProfileEntry", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -178,8 +188,9 @@ class ApApProfileEntries(models.Model):
         db_table = 'ap_ap_profile_entries'
 
 
-class ApConnectionSettings(models.Model):
-    ap_id = models.IntegerField(blank=True, null=True)
+class ApConnectionSetting(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     grouping = models.CharField(max_length=25, blank=True, null=True)
     name = models.CharField(max_length=25, blank=True, null=True)
     value = models.CharField(max_length=40, blank=True, null=True)
@@ -191,8 +202,9 @@ class ApConnectionSettings(models.Model):
         db_table = 'ap_connection_settings'
 
 
-class ApLoads(models.Model):
-    ap_id = models.IntegerField(blank=True, null=True)
+class ApLoad(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     mem_total = models.IntegerField(blank=True, null=True)
     mem_free = models.IntegerField(blank=True, null=True)
     uptime = models.CharField(max_length=255, blank=True, null=True)
@@ -208,8 +220,9 @@ class ApLoads(models.Model):
         db_table = 'ap_loads'
 
 
-class ApProfileEntries(models.Model):
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+class ApProfileEntry(models.Model):
+
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=128)
     hidden = models.IntegerField()
     isolate = models.IntegerField()
@@ -224,7 +237,7 @@ class ApProfileEntries(models.Model):
     chk_maxassoc = models.IntegerField()
     maxassoc = models.IntegerField(blank=True, null=True)
     macfilter = models.CharField(max_length=7, blank=True, null=True)
-    permanent_user_id = models.IntegerField()
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.CASCADE)
     nasid = models.CharField(max_length=255)
     auto_nasid = models.IntegerField()
     accounting = models.IntegerField()
@@ -237,15 +250,16 @@ class ApProfileEntries(models.Model):
     ft_over_ds = models.IntegerField()
     ft_pskgenerate_local = models.IntegerField()
     apply_to_all = models.IntegerField()
-    realm_id = models.IntegerField(blank=True, null=True)
+    realm = models.ForeignKey("Realm", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'ap_profile_entries'
 
 
-class ApProfileEntrySchedules(models.Model):
-    ap_profile_entry_id = models.IntegerField(blank=True, null=True)
+class ApProfileEntrySchedule(models.Model):
+
+    ap_profile_entry = models.ForeignKey("ApProfileEntry", on_delete=models.SET_NULL, blank=True, null=True)
     action = models.CharField(max_length=3, blank=True, null=True)
     mo = models.IntegerField()
     tu = models.IntegerField()
@@ -263,9 +277,10 @@ class ApProfileEntrySchedules(models.Model):
         db_table = 'ap_profile_entry_schedules'
 
 
-class ApProfileExitApProfileEntries(models.Model):
-    ap_profile_exit_id = models.IntegerField()
-    ap_profile_entry_id = models.IntegerField()
+class ApProfileExitApProfileEntry(models.Model):
+
+    ap_profile_exit = models.ForeignKey("ApProfileExit", on_delete=models.CASCADE)
+    ap_profile_entry = models.ForeignKey("ApProfileEntry", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -274,8 +289,9 @@ class ApProfileExitApProfileEntries(models.Model):
         db_table = 'ap_profile_exit_ap_profile_entries'
 
 
-class ApProfileExitCaptivePortals(models.Model):
-    ap_profile_exit_id = models.IntegerField()
+class ApProfileExitCaptivePortal(models.Model):
+
+    ap_profile_exit = models.ForeignKey("ApProfileExit", on_delete=models.CASCADE)
     radius_1 = models.CharField(max_length=128)
     radius_2 = models.CharField(max_length=128)
     radius_secret = models.CharField(max_length=128)
@@ -307,9 +323,10 @@ class ApProfileExitCaptivePortals(models.Model):
         db_table = 'ap_profile_exit_captive_portals'
 
 
-class ApProfileExitPppoeServers(models.Model):
-    ap_profile_exit_id = models.IntegerField()
-    accel_profile_id = models.IntegerField()
+class ApProfileExitPppoeServer(models.Model):
+
+    ap_profile_exit = models.ForeignKey("ApProfileExit", on_delete=models.CASCADE)
+    accel_profile = models.ForeignKey("AccelProfile", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -318,8 +335,9 @@ class ApProfileExitPppoeServers(models.Model):
         db_table = 'ap_profile_exit_pppoe_servers'
 
 
-class ApProfileExitSettings(models.Model):
-    ap_profile_exit_id = models.IntegerField()
+class ApProfileExitSetting(models.Model):
+
+    ap_profile_exit = models.ForeignKey("ApProfileExit", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -330,14 +348,15 @@ class ApProfileExitSettings(models.Model):
         db_table = 'ap_profile_exit_settings'
 
 
-class ApProfileExits(models.Model):
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+class ApProfileExit(models.Model):
+
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     type = models.CharField(max_length=16, blank=True, null=True)
     vlan = models.IntegerField(blank=True, null=True)
     auto_dynamic_client = models.IntegerField()
     realm_list = models.CharField(max_length=128)
     auto_login_page = models.IntegerField()
-    dynamic_detail_id = models.IntegerField(blank=True, null=True)
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     openvpn_server_id = models.IntegerField(blank=True, null=True)
@@ -348,15 +367,16 @@ class ApProfileExits(models.Model):
     dns_1 = models.CharField(max_length=50)
     dns_2 = models.CharField(max_length=50)
     apply_firewall_profile = models.IntegerField()
-    firewall_profile_id = models.IntegerField()
+    firewall_profile = models.ForeignKey("FirewallProfile", on_delete=models.CASCADE)
 
     class Meta:
         managed = False
         db_table = 'ap_profile_exits'
 
 
-class ApProfileSettings(models.Model):
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+class ApProfileSetting(models.Model):
+
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     password = models.CharField(max_length=128)
     heartbeat_interval = models.IntegerField()
     heartbeat_dead_after = models.IntegerField()
@@ -382,7 +402,7 @@ class ApProfileSettings(models.Model):
     report_adv_full = models.IntegerField(blank=True, null=True)
     report_adv_sampling = models.IntegerField(blank=True, null=True)
     enable_schedules = models.IntegerField()
-    schedule_id = models.IntegerField(blank=True, null=True)
+    schedule = models.ForeignKey("Schedule", on_delete=models.SET_NULL, blank=True, null=True)
     vlan_enable = models.IntegerField()
     vlan_range_or_list = models.CharField(max_length=5, blank=True, null=True)
     vlan_start = models.IntegerField()
@@ -394,8 +414,9 @@ class ApProfileSettings(models.Model):
         db_table = 'ap_profile_settings'
 
 
-class ApProfileSpecifics(models.Model):
-    ap_profile_id = models.IntegerField()
+class ApProfileSpecific(models.Model):
+
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -406,9 +427,10 @@ class ApProfileSpecifics(models.Model):
         db_table = 'ap_profile_specifics'
 
 
-class ApProfiles(models.Model):
+class ApProfile(models.Model):
+
     name = models.CharField(max_length=128)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     enable_alerts = models.IntegerField()
@@ -419,9 +441,10 @@ class ApProfiles(models.Model):
         db_table = 'ap_profiles'
 
 
-class ApStaticEntryOverrides(models.Model):
-    ap_id = models.IntegerField()
-    ap_profile_entry_id = models.IntegerField()
+class ApStaticEntryOverride(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.CASCADE)
+    ap_profile_entry = models.ForeignKey("ApProfileEntry", on_delete=models.CASCADE)
     item = models.CharField(max_length=64)
     value = models.CharField(max_length=64)
     created = models.DateTimeField()
@@ -432,9 +455,10 @@ class ApStaticEntryOverrides(models.Model):
         db_table = 'ap_static_entry_overrides'
 
 
-class ApStations(models.Model):
-    ap_id = models.IntegerField(blank=True, null=True)
-    ap_profile_entry_id = models.IntegerField(blank=True, null=True)
+class ApStation(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile_entry = models.ForeignKey("ApProfileEntry", on_delete=models.SET_NULL, blank=True, null=True)
     radio_number = models.IntegerField()
     frequency_band = models.CharField(max_length=10, blank=True, null=True)
     mac = models.CharField(max_length=17)
@@ -462,8 +486,9 @@ class ApStations(models.Model):
         db_table = 'ap_stations'
 
 
-class ApSystems(models.Model):
-    ap_id = models.IntegerField(blank=True, null=True)
+class ApSystem(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     category = models.CharField(max_length=255)
@@ -475,8 +500,9 @@ class ApSystems(models.Model):
         db_table = 'ap_systems'
 
 
-class ApUptmHistories(models.Model):
-    ap_id = models.IntegerField(blank=True, null=True)
+class ApUptmHistory(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     ap_state = models.IntegerField()
     state_datetime = models.DateTimeField()
     report_datetime = models.DateTimeField()
@@ -488,8 +514,9 @@ class ApUptmHistories(models.Model):
         db_table = 'ap_uptm_histories'
 
 
-class ApWifiSettings(models.Model):
-    ap_id = models.IntegerField(blank=True, null=True)
+class ApWifiSetting(models.Model):
+
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     value = models.CharField(max_length=255, blank=True, null=True)
     created = models.DateTimeField()
@@ -500,7 +527,8 @@ class ApWifiSettings(models.Model):
         db_table = 'ap_wifi_settings'
 
 
-class AppliedFupComponents(models.Model):
+class AppliedFupComponent(models.Model):
+
     username = models.CharField(max_length=255, blank=True, null=True)
     profile_fup_component_id = models.IntegerField()
     created = models.DateTimeField()
@@ -511,8 +539,9 @@ class AppliedFupComponents(models.Model):
         db_table = 'applied_fup_components'
 
 
-class Aps(models.Model):
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+class Ap(models.Model):
+
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     mac = models.CharField(max_length=255)
@@ -535,16 +564,17 @@ class Aps(models.Model):
     enable_alerts = models.IntegerField()
     enable_overviews = models.IntegerField()
     enable_schedules = models.IntegerField()
-    schedule_id = models.IntegerField(blank=True, null=True)
+    schedule = models.ForeignKey("Schedule", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'aps'
 
 
-class ArMeshDailySummaries(models.Model):
+class ArMeshDailySummary(models.Model):
+
     id = models.IntegerField(primary_key=True)
-    mesh_id = models.IntegerField()
+    mesh = models.ForeignKey("Mesh", on_delete=models.CASCADE)
     the_date = models.DateField()
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -571,9 +601,10 @@ class ArMeshDailySummaries(models.Model):
         unique_together = (('mesh_id', 'the_date'),)
 
 
-class ArNodeIbssConnections(models.Model):
+class ArNodeIbssConnection(models.Model):
+
     id = models.IntegerField(primary_key=True)
-    node_id = models.IntegerField(blank=True, null=True)
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     station_node_id = models.IntegerField(blank=True, null=True)
     vendor = models.CharField(max_length=255, blank=True, null=True)
     mac = models.CharField(max_length=17)
@@ -604,10 +635,11 @@ class ArNodeIbssConnections(models.Model):
         db_table = 'ar_node_ibss_connections'
 
 
-class ArNodeStations(models.Model):
+class ArNodeStation(models.Model):
+
     id = models.IntegerField(primary_key=True)
-    node_id = models.IntegerField(blank=True, null=True)
-    mesh_entry_id = models.IntegerField(blank=True, null=True)
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.SET_NULL, blank=True, null=True)
     vendor = models.CharField(max_length=255, blank=True, null=True)
     mac = models.CharField(max_length=17)
     tx_bytes = models.BigIntegerField()
@@ -637,9 +669,10 @@ class ArNodeStations(models.Model):
         db_table = 'ar_node_stations'
 
 
-class ArNodeUptmHistories(models.Model):
+class ArNodeUptmHistory(models.Model):
+
     id = models.IntegerField(primary_key=True)
-    node_id = models.IntegerField(blank=True, null=True)
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     node_state = models.IntegerField()
     state_datetime = models.DateTimeField()
     report_datetime = models.DateTimeField()
@@ -651,7 +684,8 @@ class ArNodeUptmHistories(models.Model):
         db_table = 'ar_node_uptm_histories'
 
 
-class AutoDevices(models.Model):
+class AutoDevice(models.Model):
+
     mac = models.CharField(primary_key=True, max_length=17)
     username = models.CharField(max_length=255)
 
@@ -660,7 +694,8 @@ class AutoDevices(models.Model):
         db_table = 'auto_devices'
 
 
-class Checks(models.Model):
+class Check(models.Model):
+
     name = models.CharField(max_length=40)
     value = models.CharField(max_length=40)
     created = models.DateTimeField()
@@ -671,7 +706,8 @@ class Checks(models.Model):
         db_table = 'checks'
 
 
-class ClientMacs(models.Model):
+class ClientMac(models.Model):
+
     mac = models.CharField(unique=True, max_length=17, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
@@ -681,9 +717,10 @@ class ClientMacs(models.Model):
         db_table = 'client_macs'
 
 
-class CloudAdmins(models.Model):
-    cloud_id = models.IntegerField(blank=True, null=True)
-    user_id = models.IntegerField(blank=True, null=True)
+class CloudAdmin(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey("User", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -692,8 +729,9 @@ class CloudAdmins(models.Model):
         db_table = 'cloud_admins'
 
 
-class CloudSettings(models.Model):
-    cloud_id = models.IntegerField()
+class CloudSetting(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -704,10 +742,11 @@ class CloudSettings(models.Model):
         db_table = 'cloud_settings'
 
 
-class Clouds(models.Model):
+class Cloud(models.Model):
+
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=255)
-    user_id = models.IntegerField(blank=True, null=True)
+    user = models.ForeignKey("User", on_delete=models.SET_NULL, blank=True, null=True)
     lat = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     lng = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     created = models.DateTimeField()
@@ -719,7 +758,8 @@ class Clouds(models.Model):
 
 
 class CoaRequests(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     multiple_gateways = models.IntegerField()
     avp_json = models.TextField(blank=True, null=True)
     result = models.TextField(blank=True, null=True)
@@ -733,7 +773,8 @@ class CoaRequests(models.Model):
         db_table = 'coa_requests'
 
 
-class Countries(models.Model):
+class Country(models.Model):
+
     name = models.CharField(max_length=64)
     alpha_2_code = models.CharField(max_length=2)
     created = models.DateTimeField()
@@ -744,8 +785,9 @@ class Countries(models.Model):
         db_table = 'countries'
 
 
-class DataCollectorOtps(models.Model):
-    data_collector_id = models.IntegerField()
+class DataCollectorOtp(models.Model):
+
+    data_collector = models.ForeignKey("DataCollector", on_delete=models.CASCADE)
     status = models.CharField(max_length=13, blank=True, null=True)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -756,8 +798,9 @@ class DataCollectorOtps(models.Model):
         db_table = 'data_collector_otps'
 
 
-class DataCollectors(models.Model):
-    dynamic_detail_id = models.IntegerField(blank=True, null=True)
+class DataCollector(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.SET_NULL, blank=True, null=True)
     email = models.CharField(max_length=255)
     mac = models.CharField(max_length=36)
     cp_mac = models.CharField(max_length=36, blank=True, null=True)
@@ -789,7 +832,8 @@ class DataCollectors(models.Model):
         db_table = 'data_collectors'
 
 
-class Devices(models.Model):
+class Device(models.Model):
+
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=255)
     active = models.IntegerField()
@@ -798,7 +842,7 @@ class Devices(models.Model):
     last_accept_nas = models.CharField(max_length=128, blank=True, null=True)
     last_reject_nas = models.CharField(max_length=128, blank=True, null=True)
     last_reject_message = models.CharField(max_length=255, blank=True, null=True)
-    permanent_user_id = models.IntegerField(blank=True, null=True)
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     perc_time_used = models.IntegerField(blank=True, null=True)
@@ -812,7 +856,7 @@ class Devices(models.Model):
     realm = models.CharField(max_length=100)
     realm_id = models.IntegerField(blank=True, null=True)
     profile = models.CharField(max_length=100)
-    profile_id = models.IntegerField(blank=True, null=True)
+    profile = models.ForeignKey("Profile", on_delete=models.SET_NULL, blank=True, null=True)
     from_date = models.DateTimeField(blank=True, null=True)
     to_date = models.DateTimeField(blank=True, null=True)
 
@@ -821,8 +865,9 @@ class Devices(models.Model):
         db_table = 'devices'
 
 
-class DynamicClientMacs(models.Model):
-    dynamic_client_id = models.IntegerField(blank=True, null=True)
+class DynamicClientMac(models.Model):
+
+    dynamic_client = models.ForeignKey("DynamicClient", on_delete=models.SET_NULL, blank=True, null=True)
     client_mac_id = models.IntegerField(blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
@@ -833,9 +878,10 @@ class DynamicClientMacs(models.Model):
         unique_together = (('dynamic_client_id', 'client_mac_id'),)
 
 
-class DynamicClientRealms(models.Model):
-    dynamic_client_id = models.IntegerField()
-    realm_id = models.IntegerField()
+class DynamicClientRealm(models.Model):
+
+    dynamic_client = models.ForeignKey("DynamicClient", on_delete=models.CASCADE)
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -845,7 +891,8 @@ class DynamicClientRealms(models.Model):
 
 
 class DynamicClientSettings(models.Model):
-    dynamic_client_id = models.IntegerField()
+
+    dynamic_client = models.ForeignKey("DynamicClient", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -856,7 +903,8 @@ class DynamicClientSettings(models.Model):
         db_table = 'dynamic_client_settings'
 
 
-class DynamicClientStates(models.Model):
+class DynamicClientState(models.Model):
+
     dynamic_client_id = models.CharField(max_length=36)
     state = models.IntegerField()
     created = models.DateTimeField()
@@ -867,7 +915,8 @@ class DynamicClientStates(models.Model):
         db_table = 'dynamic_client_states'
 
 
-class DynamicClients(models.Model):
+class DynamicClient(models.Model):
+
     name = models.CharField(max_length=64)
     nasidentifier = models.CharField(max_length=128)
     calledstationid = models.CharField(max_length=128)
@@ -882,7 +931,7 @@ class DynamicClients(models.Model):
     lat = models.FloatField(blank=True, null=True)
     lon = models.FloatField(blank=True, null=True)
     photo_file_name = models.CharField(max_length=128)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     data_limit_active = models.IntegerField()
@@ -909,8 +958,9 @@ class DynamicClients(models.Model):
         db_table = 'dynamic_clients'
 
 
-class DynamicDetailCtcs(models.Model):
-    dynamic_detail_id = models.IntegerField(blank=True, null=True)
+class DynamicDetailCtc(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.SET_NULL, blank=True, null=True)
     connect_check = models.IntegerField()
     connect_username = models.CharField(max_length=50)
     connect_suffix = models.CharField(max_length=50)
@@ -957,14 +1007,15 @@ class DynamicDetailCtcs(models.Model):
     modified = models.DateTimeField()
     ci_phone_otp = models.IntegerField()
     ci_email_otp = models.IntegerField()
-    permanent_user_id = models.IntegerField()
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.CASCADE)
 
     class Meta:
         managed = False
         db_table = 'dynamic_detail_ctcs'
 
 
-class DynamicDetailLanguages(models.Model):
+class DynamicDetailLanguage(models.Model):
+
     name = models.CharField(max_length=50, blank=True, null=True)
     iso_code = models.CharField(max_length=2, blank=True, null=True)
     rtl = models.IntegerField()
@@ -976,8 +1027,9 @@ class DynamicDetailLanguages(models.Model):
         db_table = 'dynamic_detail_languages'
 
 
-class DynamicDetailMobiles(models.Model):
-    dynamic_detail_id = models.IntegerField(blank=True, null=True)
+class DynamicDetailMobile(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.SET_NULL, blank=True, null=True)
     mobile_only = models.IntegerField()
     content = models.TextField()
     android_enable = models.IntegerField()
@@ -996,10 +1048,11 @@ class DynamicDetailMobiles(models.Model):
         db_table = 'dynamic_detail_mobiles'
 
 
-class DynamicDetailPrelogins(models.Model):
+class DynamicDetailPrelogin(models.Model):
+
     mac = models.CharField(max_length=64)
     nasid = models.CharField(max_length=64)
-    dynamic_detail_id = models.IntegerField()
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.CASCADE)
     completed = models.IntegerField()
     created = models.DateTimeField()
     modified = models.DateTimeField()
@@ -1009,10 +1062,11 @@ class DynamicDetailPrelogins(models.Model):
         db_table = 'dynamic_detail_prelogins'
 
 
-class DynamicDetailSocialLogins(models.Model):
-    dynamic_detail_id = models.IntegerField()
-    profile_id = models.IntegerField()
-    realm_id = models.IntegerField()
+class DynamicDetailSocialLogin(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.CASCADE)
+    profile = models.ForeignKey("Profile", on_delete=models.CASCADE)
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     enable = models.IntegerField()
     record_info = models.IntegerField()
@@ -1029,8 +1083,9 @@ class DynamicDetailSocialLogins(models.Model):
         db_table = 'dynamic_detail_social_logins'
 
 
-class DynamicDetailTransKeys(models.Model):
-    dynamic_detail_id = models.IntegerField(blank=True, null=True)
+class DynamicDetailTransKey(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     created = models.DateTimeField(blank=True, null=True)
     modified = models.DateTimeField(blank=True, null=True)
@@ -1040,7 +1095,8 @@ class DynamicDetailTransKeys(models.Model):
         db_table = 'dynamic_detail_trans_keys'
 
 
-class DynamicDetailTranslations(models.Model):
+class DynamicDetailTranslation(models.Model):
+
     dynamic_detail_language_id = models.IntegerField(blank=True, null=True)
     dynamic_detail_trans_key_id = models.IntegerField(blank=True, null=True)
     value = models.CharField(max_length=255, blank=True, null=True)
@@ -1052,7 +1108,8 @@ class DynamicDetailTranslations(models.Model):
         db_table = 'dynamic_detail_translations'
 
 
-class DynamicDetails(models.Model):
+class DynamicDetail(models.Model):
+
     name = models.CharField(max_length=64)
     icon_file_name = models.CharField(max_length=128)
     phone = models.CharField(max_length=14)
@@ -1067,7 +1124,7 @@ class DynamicDetails(models.Model):
     country = models.CharField(max_length=50)
     lat = models.FloatField(blank=True, null=True)
     lon = models.FloatField(blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     t_c_check = models.IntegerField()
     t_c_url = models.CharField(max_length=50)
     redirect_check = models.IntegerField()
@@ -1097,8 +1154,8 @@ class DynamicDetails(models.Model):
     mikrotik_desktop_url = models.CharField(max_length=255)
     mikrotik_mobile_url = models.CharField(max_length=255)
     default_language = models.CharField(max_length=255)
-    realm_id = models.IntegerField(blank=True, null=True)
-    profile_id = models.IntegerField(blank=True, null=True)
+    realm = models.ForeignKey("Realm", on_delete=models.SET_NULL, blank=True, null=True)
+    profile = models.ForeignKey("Profile", on_delete=models.SET_NULL, blank=True, null=True)
     reg_auto_suffix_check = models.IntegerField()
     reg_auto_suffix = models.CharField(max_length=200)
     reg_mac_check = models.IntegerField()
@@ -1122,15 +1179,16 @@ class DynamicDetails(models.Model):
     chilli_use_chap = models.IntegerField()
     reg_otp_sms = models.IntegerField()
     reg_otp_email = models.IntegerField()
-    permanent_user_id = models.IntegerField()
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.CASCADE)
 
     class Meta:
         managed = False
         db_table = 'dynamic_details'
 
 
-class DynamicPages(models.Model):
-    dynamic_detail_id = models.IntegerField()
+class DynamicPage(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     content = models.TextField()
     created = models.DateTimeField(blank=True, null=True)
@@ -1143,11 +1201,12 @@ class DynamicPages(models.Model):
         db_table = 'dynamic_pages'
 
 
-class DynamicPairs(models.Model):
+class DynamicPair(models.Model):
+
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=64)
     priority = models.IntegerField()
-    dynamic_detail_id = models.IntegerField(blank=True, null=True)
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1156,7 +1215,8 @@ class DynamicPairs(models.Model):
         db_table = 'dynamic_pairs'
 
 
-class DynamicPhotoTranslations(models.Model):
+class DynamicPhotoTranslation(models.Model):
+
     dynamic_detail_language_id = models.IntegerField(blank=True, null=True)
     dynamic_photo_id = models.IntegerField(blank=True, null=True)
     title = models.CharField(max_length=255, blank=True, null=True)
@@ -1169,8 +1229,9 @@ class DynamicPhotoTranslations(models.Model):
         db_table = 'dynamic_photo_translations'
 
 
-class DynamicPhotos(models.Model):
-    dynamic_detail_id = models.IntegerField()
+class DynamicPhoto(models.Model):
+
+    dynamic_detail = models.ForeignKey("DynamicDetail", on_delete=models.CASCADE)
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
@@ -1189,8 +1250,9 @@ class DynamicPhotos(models.Model):
         db_table = 'dynamic_photos'
 
 
-class EmailHistories(models.Model):
-    cloud_id = models.IntegerField()
+class EmailHistory(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.CASCADE)
     recipient = models.CharField(max_length=100, blank=True, null=True)
     reason = models.CharField(max_length=25, blank=True, null=True)
     message = models.CharField(max_length=255, blank=True, null=True)
@@ -1202,7 +1264,8 @@ class EmailHistories(models.Model):
         db_table = 'email_histories'
 
 
-class EmailMessages(models.Model):
+class EmailMessage(models.Model):
+
     name = models.CharField(max_length=64)
     title = models.CharField(max_length=64)
     message = models.CharField(max_length=255)
@@ -1214,9 +1277,10 @@ class EmailMessages(models.Model):
         db_table = 'email_messages'
 
 
-class FirewallApps(models.Model):
+class FirewallApp(models.Model):
+
     name = models.CharField(max_length=16, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     fa_code = models.CharField(max_length=64, blank=True, null=True)
     elements = models.TextField()
     comment = models.CharField(max_length=100)
@@ -1228,8 +1292,9 @@ class FirewallApps(models.Model):
         db_table = 'firewall_apps'
 
 
-class FirewallProfileEntries(models.Model):
-    firewall_profile_id = models.IntegerField(blank=True, null=True)
+class FirewallProfileEntry(models.Model):
+
+    firewall_profile = models.ForeignKey("FirewallProfile", on_delete=models.SET_NULL, blank=True, null=True)
     action = models.CharField(max_length=5, blank=True, null=True)
     category = models.CharField(max_length=13, blank=True, null=True)
     domain = models.CharField(max_length=100, blank=True, null=True)
@@ -1255,7 +1320,8 @@ class FirewallProfileEntries(models.Model):
         db_table = 'firewall_profile_entries'
 
 
-class FirewallProfileEntryFirewallApps(models.Model):
+class FirewallProfileEntryFirewallApp(models.Model):
+
     firewall_profile_entry_id = models.IntegerField()
     firewall_app_id = models.IntegerField()
     created = models.DateTimeField()
@@ -1266,9 +1332,10 @@ class FirewallProfileEntryFirewallApps(models.Model):
         db_table = 'firewall_profile_entry_firewall_apps'
 
 
-class FirewallProfiles(models.Model):
+class FirewallProfile(models.Model):
+
     name = models.CharField(max_length=64, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1277,7 +1344,8 @@ class FirewallProfiles(models.Model):
         db_table = 'firewall_profiles'
 
 
-class ForwardLookups(models.Model):
+class ForwardLookup(models.Model):
+
     fqdn = models.CharField(max_length=255)
     ip = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -1288,7 +1356,8 @@ class ForwardLookups(models.Model):
         db_table = 'forward_lookups'
 
 
-class Groups(models.Model):
+class Group(models.Model):
+
     name = models.CharField(max_length=100)
     created = models.DateTimeField(blank=True, null=True)
     modified = models.DateTimeField(blank=True, null=True)
@@ -1298,7 +1367,8 @@ class Groups(models.Model):
         db_table = 'groups'
 
 
-class HardwareRadios(models.Model):
+class HardwareRadio(models.Model):
+
     radio_number = models.IntegerField()
     disabled = models.IntegerField()
     txpower = models.IntegerField()
@@ -1323,7 +1393,8 @@ class HardwareRadios(models.Model):
         db_table = 'hardware_radios'
 
 
-class Hardwares(models.Model):
+class Hardware(models.Model):
+
     name = models.CharField(max_length=255)
     vendor = models.CharField(max_length=255)
     model = models.CharField(max_length=255)
@@ -1334,7 +1405,7 @@ class Hardwares(models.Model):
     lan = models.CharField(max_length=20, blank=True, null=True)
     radio_count = models.IntegerField()
     photo_file_name = models.CharField(max_length=128)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1343,10 +1414,11 @@ class Hardwares(models.Model):
         db_table = 'hardwares'
 
 
-class HomeServerPools(models.Model):
+class HomeServerPool(models.Model):
+
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=19, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1355,7 +1427,8 @@ class HomeServerPools(models.Model):
         db_table = 'home_server_pools'
 
 
-class HomeServers(models.Model):
+class HomeServer(models.Model):
+
     type = models.CharField(max_length=9, blank=True, null=True)
     ipaddr = models.CharField(max_length=255)
     port = models.IntegerField()
@@ -1373,8 +1446,9 @@ class HomeServers(models.Model):
         db_table = 'home_servers'
 
 
-class IspSpecifics(models.Model):
-    cloud_id = models.IntegerField(blank=True, null=True)
+class IspSpecific(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=40, blank=True, null=True)
     region = models.CharField(max_length=40, blank=True, null=True)
     field1 = models.CharField(max_length=40, blank=True, null=True)
@@ -1389,7 +1463,8 @@ class IspSpecifics(models.Model):
         db_table = 'isp_specifics'
 
 
-class Languages(models.Model):
+class Language(models.Model):
+
     name = models.CharField(max_length=50, blank=True, null=True)
     iso_code = models.CharField(max_length=2, blank=True, null=True)
     rtl = models.IntegerField()
@@ -1401,27 +1476,29 @@ class Languages(models.Model):
         db_table = 'languages'
 
 
-class MacActions(models.Model):
-    cloud_id = models.IntegerField(blank=True, null=True)
-    mesh_id = models.IntegerField(blank=True, null=True)
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+class MacAction(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     client_mac_id = models.IntegerField(blank=True, null=True)
     action = models.CharField(max_length=8, blank=True, null=True)
     bw_up = models.IntegerField(blank=True, null=True)
     bw_down = models.IntegerField(blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
-    firewall_profile_id = models.IntegerField(blank=True, null=True)
+    firewall_profile = models.ForeignKey("FirewallProfile", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'mac_actions'
 
 
-class MacAliases(models.Model):
+class MacAlias(models.Model):
+
     mac = models.CharField(max_length=20, blank=True, null=True)
     alias = models.CharField(max_length=255, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1430,7 +1507,8 @@ class MacAliases(models.Model):
         db_table = 'mac_aliases'
 
 
-class MacUsages(models.Model):
+class MacUsage(models.Model):
+
     mac = models.CharField(max_length=17)
     username = models.CharField(max_length=255)
     data_used = models.BigIntegerField(blank=True, null=True)
@@ -1445,8 +1523,9 @@ class MacUsages(models.Model):
         db_table = 'mac_usages'
 
 
-class MeshDailySummaries(models.Model):
-    mesh_id = models.IntegerField()
+class MeshDailySummary(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.CASCADE)
     the_date = models.DateField()
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -1473,8 +1552,9 @@ class MeshDailySummaries(models.Model):
         unique_together = (('mesh_id', 'the_date'),)
 
 
-class MeshEntries(models.Model):
-    mesh_id = models.IntegerField(blank=True, null=True)
+class MeshEntry(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=128)
     hidden = models.IntegerField()
     isolate = models.IntegerField()
@@ -1489,7 +1569,7 @@ class MeshEntries(models.Model):
     chk_maxassoc = models.IntegerField()
     maxassoc = models.IntegerField(blank=True, null=True)
     macfilter = models.CharField(max_length=7, blank=True, null=True)
-    permanent_user_id = models.IntegerField()
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.CASCADE)
     nasid = models.CharField(max_length=255)
     auto_nasid = models.IntegerField()
     accounting = models.IntegerField()
@@ -1502,15 +1582,16 @@ class MeshEntries(models.Model):
     mobility_domain = models.CharField(max_length=4)
     ft_over_ds = models.IntegerField()
     ft_pskgenerate_local = models.IntegerField()
-    realm_id = models.IntegerField(blank=True, null=True)
+    realm = models.ForeignKey("Realm", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'mesh_entries'
 
 
-class MeshEntrySchedules(models.Model):
-    mesh_entry_id = models.IntegerField(blank=True, null=True)
+class MeshEntrySchedule(models.Model):
+
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.SET_NULL, blank=True, null=True)
     action = models.CharField(max_length=3, blank=True, null=True)
     mo = models.IntegerField()
     tu = models.IntegerField()
@@ -1528,8 +1609,9 @@ class MeshEntrySchedules(models.Model):
         db_table = 'mesh_entry_schedules'
 
 
-class MeshExitCaptivePortals(models.Model):
-    mesh_exit_id = models.IntegerField()
+class MeshExitCaptivePortal(models.Model):
+
+    mesh_exit = models.ForeignKey("MeshExit", on_delete=models.CASCADE)
     radius_1 = models.CharField(max_length=128)
     radius_2 = models.CharField(max_length=128)
     radius_secret = models.CharField(max_length=128)
@@ -1561,9 +1643,10 @@ class MeshExitCaptivePortals(models.Model):
         db_table = 'mesh_exit_captive_portals'
 
 
-class MeshExitMeshEntries(models.Model):
-    mesh_exit_id = models.IntegerField()
-    mesh_entry_id = models.IntegerField()
+class MeshExitMeshEntry(models.Model):
+
+    mesh_exit = models.ForeignKey("MeshExit", on_delete=models.CASCADE)
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1572,9 +1655,10 @@ class MeshExitMeshEntries(models.Model):
         db_table = 'mesh_exit_mesh_entries'
 
 
-class MeshExitPppoeServers(models.Model):
-    mesh_exit_id = models.IntegerField()
-    accel_profile_id = models.IntegerField()
+class MeshExitPppoeServer(models.Model):
+
+    mesh_exit = models.ForeignKey("MeshExit", on_delete=models.CASCADE)
+    accel_profile = models.ForeignKey("AccelProfile", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1583,8 +1667,9 @@ class MeshExitPppoeServers(models.Model):
         db_table = 'mesh_exit_pppoe_servers'
 
 
-class MeshExitSettings(models.Model):
-    mesh_exit_id = models.IntegerField()
+class MeshExitSetting(models.Model):
+
+    mesh_exit = models.ForeignKey("MeshExit", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -1595,8 +1680,9 @@ class MeshExitSettings(models.Model):
         db_table = 'mesh_exit_settings'
 
 
-class MeshExits(models.Model):
-    mesh_id = models.IntegerField(blank=True, null=True)
+class MeshExit(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=128)
     type = models.CharField(max_length=16, blank=True, null=True)
     auto_detect = models.IntegerField()
@@ -1611,15 +1697,16 @@ class MeshExits(models.Model):
     dns_1 = models.CharField(max_length=50)
     dns_2 = models.CharField(max_length=50)
     apply_firewall_profile = models.IntegerField()
-    firewall_profile_id = models.IntegerField()
+    firewall_profile = models.ForeignKey("FirewallProfile", on_delete=models.CASCADE)
 
     class Meta:
         managed = False
         db_table = 'mesh_exits'
 
 
-class MeshSettings(models.Model):
-    mesh_id = models.IntegerField(blank=True, null=True)
+class MeshSetting(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     aggregated_ogms = models.IntegerField()
     ap_isolation = models.IntegerField()
     bonding = models.IntegerField()
@@ -1640,8 +1727,9 @@ class MeshSettings(models.Model):
         db_table = 'mesh_settings'
 
 
-class MeshSpecifics(models.Model):
-    mesh_id = models.IntegerField()
+class MeshSpecific(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -1652,11 +1740,12 @@ class MeshSpecifics(models.Model):
         db_table = 'mesh_specifics'
 
 
-class Meshes(models.Model):
+class Mesh(models.Model):
+
     name = models.CharField(max_length=128)
     ssid = models.CharField(max_length=32)
     bssid = models.CharField(max_length=32)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     tree_tag_id = models.IntegerField(blank=True, null=True)
@@ -1669,9 +1758,10 @@ class Meshes(models.Model):
         db_table = 'meshes'
 
 
-class NaRealms(models.Model):
-    na_id = models.IntegerField()
-    realm_id = models.IntegerField()
+class NaRealm(models.Model):
+
+    na = models.ForeignKey("Na", on_delete=models.CASCADE)
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1680,8 +1770,9 @@ class NaRealms(models.Model):
         db_table = 'na_realms'
 
 
-class NaSettings(models.Model):
-    na_id = models.IntegerField()
+class NaSetting(models.Model):
+
+    na = models.ForeignKey("Na", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -1692,7 +1783,8 @@ class NaSettings(models.Model):
         db_table = 'na_settings'
 
 
-class NaStates(models.Model):
+class NaState(models.Model):
+
     na_id = models.CharField(max_length=36)
     state = models.IntegerField()
     created = models.DateTimeField()
@@ -1703,7 +1795,8 @@ class NaStates(models.Model):
         db_table = 'na_states'
 
 
-class Nas(models.Model):
+class Na(models.Model):
+
     nasname = models.CharField(max_length=128)
     shortname = models.CharField(max_length=32, blank=True, null=True)
     nasidentifier = models.CharField(max_length=64)
@@ -1729,7 +1822,7 @@ class Nas(models.Model):
     lat = models.FloatField(blank=True, null=True)
     lon = models.FloatField(blank=True, null=True)
     photo_file_name = models.CharField(max_length=128)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1738,9 +1831,10 @@ class Nas(models.Model):
         db_table = 'nas'
 
 
-class Networks(models.Model):
+class Network(models.Model):
+
     name = models.CharField(max_length=64)
-    site_id = models.IntegerField(blank=True, null=True)
+    site = models.ForeignKey("Site", on_delete=models.SET_NULL, blank=True, null=True)
     lat = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     lng = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     created = models.DateTimeField()
@@ -1751,7 +1845,8 @@ class Networks(models.Model):
         db_table = 'networks'
 
 
-class NewAccountings(models.Model):
+class NewAccounting(models.Model):
+
     mac = models.CharField(primary_key=True, max_length=17)
     username = models.CharField(max_length=255)
 
@@ -1760,8 +1855,9 @@ class NewAccountings(models.Model):
         db_table = 'new_accountings'
 
 
-class NodeActions(models.Model):
-    node_id = models.IntegerField()
+class NodeAction(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.CASCADE)
     action = models.CharField(max_length=17, blank=True, null=True)
     command = models.CharField(max_length=500, blank=True, null=True)
     status = models.CharField(max_length=8, blank=True, null=True)
@@ -1774,8 +1870,9 @@ class NodeActions(models.Model):
         db_table = 'node_actions'
 
 
-class NodeConnectionSettings(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeConnectionSetting(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     grouping = models.CharField(max_length=25, blank=True, null=True)
     name = models.CharField(max_length=25, blank=True, null=True)
     value = models.CharField(max_length=40, blank=True, null=True)
@@ -1787,8 +1884,9 @@ class NodeConnectionSettings(models.Model):
         db_table = 'node_connection_settings'
 
 
-class NodeIbssConnections(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeIbssConnection(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     station_node_id = models.IntegerField(blank=True, null=True)
     radio_number = models.IntegerField()
     frequency_band = models.CharField(max_length=10, blank=True, null=True)
@@ -1818,10 +1916,11 @@ class NodeIbssConnections(models.Model):
         db_table = 'node_ibss_connections'
 
 
-class NodeIbssConnectionsDailies(models.Model):
+class NodeIbssConnectionsDaily(models.Model):
+
     mac = models.CharField(max_length=64)
-    mesh_id = models.IntegerField()
-    node_id = models.IntegerField()
+    mesh = models.ForeignKey("Mesh", on_delete=models.CASCADE)
+    node = models.ForeignKey("Node", on_delete=models.CASCADE)
     station_node_id = models.IntegerField()
     if_mac = models.CharField(max_length=64)
     radio_number = models.IntegerField()
@@ -1838,8 +1937,9 @@ class NodeIbssConnectionsDailies(models.Model):
         db_table = 'node_ibss_connections_dailies'
 
 
-class NodeLoads(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeLoad(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     mem_total = models.IntegerField(blank=True, null=True)
     mem_free = models.IntegerField(blank=True, null=True)
     uptime = models.CharField(max_length=255, blank=True, null=True)
@@ -1855,9 +1955,10 @@ class NodeLoads(models.Model):
         db_table = 'node_loads'
 
 
-class NodeMeshEntries(models.Model):
-    node_id = models.IntegerField()
-    mesh_entry_id = models.IntegerField()
+class NodeMeshEntry(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.CASCADE)
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1866,9 +1967,10 @@ class NodeMeshEntries(models.Model):
         db_table = 'node_mesh_entries'
 
 
-class NodeMeshExits(models.Model):
-    node_id = models.IntegerField()
-    mesh_exit_id = models.IntegerField()
+class NodeMeshExit(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.CASCADE)
+    mesh_exit = models.ForeignKey("MeshExit", on_delete=models.CASCADE)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -1877,8 +1979,9 @@ class NodeMeshExits(models.Model):
         db_table = 'node_mesh_exits'
 
 
-class NodeMpSettings(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeMpSetting(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -1889,8 +1992,9 @@ class NodeMpSettings(models.Model):
         db_table = 'node_mp_settings'
 
 
-class NodeNeighbors(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeNeighbor(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     gateway = models.CharField(max_length=3, blank=True, null=True)
     neighbor_id = models.IntegerField(blank=True, null=True)
     metric = models.DecimalField(max_digits=6, decimal_places=4)
@@ -1906,9 +2010,11 @@ class NodeNeighbors(models.Model):
         db_table = 'node_neighbors'
 
 
-class NodeScans(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
-    ap_id = models.IntegerField(blank=True, null=True)
+class NodeScan(models.Model):
+
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     scan_data = models.TextField(blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
@@ -1918,8 +2024,9 @@ class NodeScans(models.Model):
         db_table = 'node_scans'
 
 
-class NodeSettings(models.Model):
-    mesh_id = models.IntegerField(blank=True, null=True)
+class NodeSetting(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     password = models.CharField(max_length=128)
     power = models.IntegerField()
     all_power = models.IntegerField()
@@ -1953,7 +2060,7 @@ class NodeSettings(models.Model):
     report_adv_full = models.IntegerField(blank=True, null=True)
     report_adv_sampling = models.IntegerField(blank=True, null=True)
     enable_schedules = models.IntegerField()
-    schedule_id = models.IntegerField(blank=True, null=True)
+    schedule = models.ForeignKey("Schedule", on_delete=models.SET_NULL, blank=True, null=True)
     vlan_enable = models.IntegerField()
     vlan_range_or_list = models.CharField(max_length=5, blank=True, null=True)
     vlan_start = models.IntegerField()
@@ -1965,9 +2072,10 @@ class NodeSettings(models.Model):
         db_table = 'node_settings'
 
 
-class NodeStations(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
-    mesh_entry_id = models.IntegerField(blank=True, null=True)
+class NodeStation(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.SET_NULL, blank=True, null=True)
     radio_number = models.IntegerField()
     frequency_band = models.CharField(max_length=10, blank=True, null=True)
     mac = models.CharField(max_length=17)
@@ -1995,12 +2103,13 @@ class NodeStations(models.Model):
         db_table = 'node_stations'
 
 
-class NodeStationsDailies(models.Model):
+class NodeStationsDaily(models.Model):
+
     mac = models.CharField(max_length=64)
     node_station_id = models.IntegerField()
-    mesh_id = models.IntegerField()
-    mesh_entry_id = models.IntegerField()
-    node_id = models.IntegerField()
+    mesh = models.ForeignKey("Mesh", on_delete=models.CASCADE)
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.CASCADE)
+    node = models.ForeignKey("Node", on_delete=models.CASCADE)
     radio_number = models.IntegerField()
     frequency_band = models.CharField(max_length=10, blank=True, null=True)
     tx_bytes = models.BigIntegerField()
@@ -2015,8 +2124,9 @@ class NodeStationsDailies(models.Model):
         db_table = 'node_stations_dailies'
 
 
-class NodeSystems(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeSystem(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     category = models.CharField(max_length=255)
@@ -2028,8 +2138,9 @@ class NodeSystems(models.Model):
         db_table = 'node_systems'
 
 
-class NodeUptmHistories(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeUptmHistory(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     node_state = models.IntegerField()
     state_datetime = models.DateTimeField()
     report_datetime = models.DateTimeField()
@@ -2041,8 +2152,9 @@ class NodeUptmHistories(models.Model):
         db_table = 'node_uptm_histories'
 
 
-class NodeWifiSettings(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
+class NodeWifiSetting(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     value = models.CharField(max_length=255, blank=True, null=True)
     created = models.DateTimeField()
@@ -2053,8 +2165,9 @@ class NodeWifiSettings(models.Model):
         db_table = 'node_wifi_settings'
 
 
-class Nodes(models.Model):
-    mesh_id = models.IntegerField(blank=True, null=True)
+class Node(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     mac = models.CharField(max_length=255)
@@ -2088,14 +2201,15 @@ class Nodes(models.Model):
     enable_alerts = models.IntegerField()
     enable_overviews = models.IntegerField()
     enable_schedules = models.IntegerField()
-    schedule_id = models.IntegerField(blank=True, null=True)
+    schedule = models.ForeignKey("Schedule", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'nodes'
 
 
-class Notifications(models.Model):
+class Notification(models.Model):
+
     severity = models.IntegerField()
     is_resolved = models.IntegerField()
     notification_datetime = models.DateTimeField()
@@ -2113,13 +2227,14 @@ class Notifications(models.Model):
         db_table = 'notifications'
 
 
-class OpenvpnClients(models.Model):
+class OpenvpnClient(models.Model):
+
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=255, blank=True, null=True)
     subnet = models.IntegerField(blank=True, null=True)
     peer1 = models.IntegerField(blank=True, null=True)
     peer2 = models.IntegerField(blank=True, null=True)
-    na_id = models.IntegerField(blank=True, null=True)
+    na = models.ForeignKey("Na", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2128,14 +2243,15 @@ class OpenvpnClients(models.Model):
         db_table = 'openvpn_clients'
 
 
-class OpenvpnServerClients(models.Model):
+class OpenvpnServerClient(models.Model):
+
     mesh_ap_profile = models.CharField(max_length=10, blank=True, null=True)
     openvpn_server_id = models.IntegerField(blank=True, null=True)
-    mesh_id = models.IntegerField(blank=True, null=True)
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     mesh_exit_id = models.IntegerField(blank=True, null=True)
-    ap_profile_id = models.IntegerField(blank=True, null=True)
-    ap_profile_exit_id = models.IntegerField(blank=True, null=True)
-    ap_id = models.IntegerField(blank=True, null=True)
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile_exit = models.ForeignKey("ApProfileExit", on_delete=models.SET_NULL, blank=True, null=True)
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
     ip_address = models.CharField(max_length=40)
     last_contact_to_server = models.DateTimeField(blank=True, null=True)
     state = models.IntegerField()
@@ -2147,10 +2263,11 @@ class OpenvpnServerClients(models.Model):
         db_table = 'openvpn_server_clients'
 
 
-class OpenvpnServers(models.Model):
+class OpenvpnServer(models.Model):
+
     name = models.CharField(max_length=64)
     description = models.CharField(max_length=255)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     local_remote = models.CharField(max_length=6, blank=True, null=True)
     protocol = models.CharField(max_length=3, blank=True, null=True)
     ip_address = models.CharField(max_length=40)
@@ -2170,8 +2287,9 @@ class OpenvpnServers(models.Model):
         db_table = 'openvpn_servers'
 
 
-class PermanentUserNotifications(models.Model):
-    permanent_user_id = models.IntegerField(blank=True, null=True)
+class PermanentUserNotification(models.Model):
+
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.SET_NULL, blank=True, null=True)
     active = models.IntegerField()
     method = models.CharField(max_length=8, blank=True, null=True)
     type = models.CharField(max_length=5, blank=True, null=True)
@@ -2189,8 +2307,9 @@ class PermanentUserNotifications(models.Model):
         db_table = 'permanent_user_notifications'
 
 
-class PermanentUserOtps(models.Model):
-    permanent_user_id = models.IntegerField()
+class PermanentUserOtp(models.Model):
+
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.CASCADE)
     status = models.CharField(max_length=13, blank=True, null=True)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -2201,8 +2320,9 @@ class PermanentUserOtps(models.Model):
         db_table = 'permanent_user_otps'
 
 
-class PermanentUserSettings(models.Model):
-    permanent_user_id = models.IntegerField()
+class PermanentUserSetting(models.Model):
+
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -2213,7 +2333,8 @@ class PermanentUserSettings(models.Model):
         db_table = 'permanent_user_settings'
 
 
-class PermanentUsers(models.Model):
+class PermanentUser(models.Model):
+
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=50)
     token = models.CharField(max_length=36, blank=True, null=True)
@@ -2240,7 +2361,7 @@ class PermanentUsers(models.Model):
     realm = models.CharField(max_length=50)
     realm_id = models.IntegerField(blank=True, null=True)
     profile = models.CharField(max_length=50)
-    profile_id = models.IntegerField(blank=True, null=True)
+    profile = models.ForeignKey("Profile", on_delete=models.SET_NULL, blank=True, null=True)
     from_date = models.DateTimeField(blank=True, null=True)
     to_date = models.DateTimeField(blank=True, null=True)
     track_auth = models.IntegerField()
@@ -2250,7 +2371,7 @@ class PermanentUsers(models.Model):
     extra_value = models.CharField(max_length=100)
     country_id = models.IntegerField(blank=True, null=True)
     language_id = models.IntegerField(blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     site = models.CharField(max_length=100)
@@ -2262,11 +2383,12 @@ class PermanentUsers(models.Model):
         db_table = 'permanent_users'
 
 
-class PptpClients(models.Model):
+class PptpClient(models.Model):
+
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=255, blank=True, null=True)
     ip = models.CharField(max_length=255, blank=True, null=True)
-    na_id = models.IntegerField(blank=True, null=True)
+    na = models.ForeignKey("Na", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2275,11 +2397,12 @@ class PptpClients(models.Model):
         db_table = 'pptp_clients'
 
 
-class PredefinedCommands(models.Model):
+class PredefinedCommand(models.Model):
+
     name = models.CharField(max_length=64, blank=True, null=True)
     command = models.CharField(max_length=255)
     action = models.CharField(max_length=17, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2288,9 +2411,10 @@ class PredefinedCommands(models.Model):
         db_table = 'predefined_commands'
 
 
-class ProfileComponents(models.Model):
+class ProfileComponent(models.Model):
+
     name = models.CharField(max_length=128)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2299,8 +2423,9 @@ class ProfileComponents(models.Model):
         db_table = 'profile_components'
 
 
-class ProfileFupComponents(models.Model):
-    profile_id = models.IntegerField()
+class ProfileFupComponent(models.Model):
+
+    profile = models.ForeignKey("Profile", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     if_condition = models.CharField(max_length=11, blank=True, null=True)
     time_start = models.CharField(max_length=255, blank=True, null=True)
@@ -2318,9 +2443,10 @@ class ProfileFupComponents(models.Model):
         db_table = 'profile_fup_components'
 
 
-class Profiles(models.Model):
+class Profile(models.Model):
+
     name = models.CharField(max_length=128)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2330,6 +2456,7 @@ class Profiles(models.Model):
 
 
 class Radacct(models.Model):
+
     radacctid = models.BigAutoField(primary_key=True)
     acctsessionid = models.CharField(max_length=64)
     acctuniqueid = models.CharField(unique=True, max_length=32)
@@ -2367,6 +2494,7 @@ class Radacct(models.Model):
 
 
 class Radcheck(models.Model):
+
     username = models.CharField(max_length=64)
     attribute = models.CharField(max_length=64)
     op = models.CharField(max_length=2)
@@ -2378,6 +2506,7 @@ class Radcheck(models.Model):
 
 
 class Radgroupcheck(models.Model):
+
     groupname = models.CharField(max_length=64)
     attribute = models.CharField(max_length=64)
     op = models.CharField(max_length=2)
@@ -2392,6 +2521,7 @@ class Radgroupcheck(models.Model):
 
 
 class Radgroupreply(models.Model):
+
     groupname = models.CharField(max_length=64)
     attribute = models.CharField(max_length=64)
     op = models.CharField(max_length=2)
@@ -2406,6 +2536,7 @@ class Radgroupreply(models.Model):
 
 
 class Radippool(models.Model):
+
     pool_name = models.CharField(max_length=30)
     framedipaddress = models.CharField(max_length=15)
     nasipaddress = models.CharField(max_length=15)
@@ -2418,7 +2549,7 @@ class Radippool(models.Model):
     extra_name = models.CharField(max_length=100)
     extra_value = models.CharField(max_length=100)
     active = models.IntegerField()
-    permanent_user_id = models.IntegerField(blank=True, null=True)
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2428,6 +2559,7 @@ class Radippool(models.Model):
 
 
 class Radpostauth(models.Model):
+
     username = models.CharField(max_length=64)
     realm = models.CharField(max_length=64, blank=True, null=True)
     pass_field = models.CharField(db_column='pass', max_length=64)  # Field renamed because it was a Python reserved word.
@@ -2441,6 +2573,7 @@ class Radpostauth(models.Model):
 
 
 class Radreply(models.Model):
+
     username = models.CharField(max_length=64)
     attribute = models.CharField(max_length=64)
     op = models.CharField(max_length=2)
@@ -2452,6 +2585,7 @@ class Radreply(models.Model):
 
 
 class Radusergroup(models.Model):
+
     username = models.CharField(max_length=64)
     groupname = models.CharField(max_length=64)
     priority = models.IntegerField()
@@ -2462,7 +2596,8 @@ class Radusergroup(models.Model):
 
 
 class RealmMacUsers(models.Model):
-    realm_id = models.IntegerField()
+
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     mac = models.CharField(max_length=17, blank=True, null=True)
     username = models.CharField(max_length=64, blank=True, null=True)
     created = models.DateTimeField()
@@ -2474,8 +2609,9 @@ class RealmMacUsers(models.Model):
         unique_together = (('realm_id', 'mac'),)
 
 
-class RealmPmks(models.Model):
-    realm_id = models.IntegerField()
+class RealmPmk(models.Model):
+
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     realm_ssid_id = models.IntegerField()
     ppsk = models.CharField(max_length=100, blank=True, null=True)
     pmk = models.CharField(max_length=64, blank=True, null=True)
@@ -2487,14 +2623,15 @@ class RealmPmks(models.Model):
         db_table = 'realm_pmks'
 
 
-class RealmSsids(models.Model):
-    realm_id = models.IntegerField()
+class RealmSsid(models.Model):
+
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     name = models.CharField(max_length=32, blank=True, null=True)
     ssid_type = models.CharField(max_length=10, blank=True, null=True)
-    mesh_id = models.IntegerField(blank=True, null=True)
-    mesh_entry_id = models.IntegerField(blank=True, null=True)
-    ap_profile_id = models.IntegerField(blank=True, null=True)
-    ap_profile_entry_id = models.IntegerField(blank=True, null=True)
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh_entry = models.ForeignKey("MeshEntry", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile_entry = models.ForeignKey("ApProfileEntry", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2503,8 +2640,9 @@ class RealmSsids(models.Model):
         db_table = 'realm_ssids'
 
 
-class RealmVlans(models.Model):
-    realm_id = models.IntegerField()
+class RealmVlan(models.Model):
+
+    realm = models.ForeignKey("Realm", on_delete=models.CASCADE)
     vlan = models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=100)
     comment = models.CharField(max_length=255)
@@ -2516,7 +2654,8 @@ class RealmVlans(models.Model):
         db_table = 'realm_vlans'
 
 
-class Realms(models.Model):
+class Realm(models.Model):
+
     name = models.CharField(max_length=64)
     icon_file_name = models.CharField(max_length=128)
     phone = models.CharField(max_length=14)
@@ -2530,7 +2669,7 @@ class Realms(models.Model):
     country = models.CharField(max_length=50)
     lat = models.FloatField(blank=True, null=True)
     lon = models.FloatField(blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     twitter = models.CharField(max_length=255)
@@ -2550,8 +2689,9 @@ class Realms(models.Model):
         db_table = 'realms'
 
 
-class RegistrationRequests(models.Model):
-    user_id = models.IntegerField(blank=True, null=True)
+class RegistrationRequest(models.Model):
+
+    user = models.ForeignKey("User", on_delete=models.SET_NULL, blank=True, null=True)
     email = models.CharField(max_length=255)
     registration_code = models.CharField(max_length=36, blank=True, null=True)
     state = models.CharField(max_length=22, blank=True, null=True)
@@ -2566,7 +2706,8 @@ class RegistrationRequests(models.Model):
         db_table = 'registration_requests'
 
 
-class ReverseLookups(models.Model):
+class ReverseLookup(models.Model):
+
     ip = models.CharField(max_length=255)
     fqdn = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -2578,6 +2719,7 @@ class ReverseLookups(models.Model):
 
 
 class RollingLastDay(models.Model):
+
     mesh_id = models.IntegerField(primary_key=True)
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2607,6 +2749,7 @@ class RollingLastDay(models.Model):
 
 
 class RollingLastHour(models.Model):
+
     mesh_id = models.IntegerField(primary_key=True)
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2636,6 +2779,7 @@ class RollingLastHour(models.Model):
 
 
 class RollingLastNinetyDays(models.Model):
+
     mesh_id = models.IntegerField(primary_key=True)
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2665,6 +2809,7 @@ class RollingLastNinetyDays(models.Model):
 
 
 class RollingLastSevenDays(models.Model):
+
     mesh_id = models.IntegerField(primary_key=True)
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2694,6 +2839,7 @@ class RollingLastSevenDays(models.Model):
 
 
 class RollingLastSixtyDays(models.Model):
+
     mesh_id = models.IntegerField(primary_key=True)
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2723,6 +2869,7 @@ class RollingLastSixtyDays(models.Model):
 
 
 class RollingLastThirtyDays(models.Model):
+
     mesh_id = models.IntegerField(primary_key=True)
     tree_tag_id = models.IntegerField(blank=True, null=True)
     mesh_name = models.CharField(max_length=255, blank=True, null=True)
@@ -2751,8 +2898,9 @@ class RollingLastThirtyDays(models.Model):
         db_table = 'rolling_last_thirty_days'
 
 
-class ScheduleEntries(models.Model):
-    schedule_id = models.IntegerField(blank=True, null=True)
+class ScheduleEntry(models.Model):
+
+    schedule = models.ForeignKey("Schedule", on_delete=models.SET_NULL, blank=True, null=True)
     description = models.CharField(max_length=255)
     type = models.CharField(max_length=18, blank=True, null=True)
     command = models.CharField(max_length=255)
@@ -2773,9 +2921,10 @@ class ScheduleEntries(models.Model):
         db_table = 'schedule_entries'
 
 
-class Schedules(models.Model):
+class Schedule(models.Model):
+
     name = models.CharField(max_length=64, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2784,9 +2933,10 @@ class Schedules(models.Model):
         db_table = 'schedules'
 
 
-class Sites(models.Model):
+class Site(models.Model):
+
     name = models.CharField(max_length=64)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     lat = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     lng = models.DecimalField(max_digits=11, decimal_places=8, blank=True, null=True)
     created = models.DateTimeField()
@@ -2797,8 +2947,9 @@ class Sites(models.Model):
         db_table = 'sites'
 
 
-class SmsHistories(models.Model):
-    cloud_id = models.IntegerField()
+class SmsHistory(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.CASCADE)
     recipient = models.CharField(max_length=100, blank=True, null=True)
     reason = models.CharField(max_length=25, blank=True, null=True)
     message = models.CharField(max_length=255, blank=True, null=True)
@@ -2812,9 +2963,10 @@ class SmsHistories(models.Model):
         db_table = 'sms_histories'
 
 
-class SocialLoginUserRealms(models.Model):
-    social_login_user_id = models.IntegerField(blank=True, null=True)
-    realm_id = models.IntegerField(blank=True, null=True)
+class SocialLoginUserRealm(models.Model):
+
+    social_login_user = models.ForeignKey("SocialLoginUser", on_delete=models.SET_NULL, blank=True, null=True)
+    realm = models.ForeignKey("Realm", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
 
@@ -2823,7 +2975,8 @@ class SocialLoginUserRealms(models.Model):
         db_table = 'social_login_user_realms'
 
 
-class SocialLoginUsers(models.Model):
+class SocialLoginUser(models.Model):
+
     provider = models.CharField(max_length=8, blank=True, null=True)
     uid = models.CharField(max_length=100)
     name = models.CharField(max_length=100)
@@ -2846,8 +2999,9 @@ class SocialLoginUsers(models.Model):
         db_table = 'social_login_users'
 
 
-class Softflows(models.Model):
-    dynamic_client_id = models.IntegerField(blank=True, null=True)
+class Softflow(models.Model):
+
+    dynamic_client = models.ForeignKey("DynamicClient", on_delete=models.SET_NULL, blank=True, null=True)
     username = models.CharField(max_length=64, blank=True, null=True)
     src_mac = models.CharField(max_length=64, blank=True, null=True)
     src_ip = models.CharField(max_length=64, blank=True, null=True)
@@ -2869,11 +3023,12 @@ class Softflows(models.Model):
         db_table = 'softflows'
 
 
-class TempFlowLogs(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
-    mesh_id = models.IntegerField(blank=True, null=True)
-    ap_id = models.IntegerField(blank=True, null=True)
-    ap_profile_id = models.IntegerField(blank=True, null=True)
+class TempFlowLog(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
+    ap = models.ForeignKey("Ap", on_delete=models.SET_NULL, blank=True, null=True)
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.SET_NULL, blank=True, null=True)
     username = models.CharField(max_length=255)
     proto = models.IntegerField()
     src_mac = models.CharField(max_length=255)
@@ -2894,9 +3049,10 @@ class TempFlowLogs(models.Model):
         db_table = 'temp_flow_logs'
 
 
-class TempProxyLogs(models.Model):
-    node_id = models.IntegerField(blank=True, null=True)
-    mesh_id = models.IntegerField(blank=True, null=True)
+class TempProxyLog(models.Model):
+
+    node = models.ForeignKey("Node", on_delete=models.SET_NULL, blank=True, null=True)
+    mesh = models.ForeignKey("Mesh", on_delete=models.SET_NULL, blank=True, null=True)
     username = models.CharField(max_length=255)
     host = models.CharField(max_length=255)
     source_ip = models.CharField(max_length=255)
@@ -2910,11 +3066,12 @@ class TempProxyLogs(models.Model):
         db_table = 'temp_proxy_logs'
 
 
-class TempReports(models.Model):
-    mesh_id = models.IntegerField()
-    node_id = models.IntegerField()
-    ap_id = models.IntegerField()
-    ap_profile_id = models.IntegerField()
+class TempReport(models.Model):
+
+    mesh = models.ForeignKey("Mesh", on_delete=models.CASCADE)
+    node = models.ForeignKey("Node", on_delete=models.CASCADE)
+    ap = models.ForeignKey("Ap", on_delete=models.CASCADE)
+    ap_profile = models.ForeignKey("ApProfile", on_delete=models.CASCADE)
     report = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField()
 
@@ -2923,7 +3080,8 @@ class TempReports(models.Model):
         db_table = 'temp_reports'
 
 
-class Timezones(models.Model):
+class Timezone(models.Model):
+
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=64)
     created = models.DateTimeField()
@@ -2934,9 +3092,10 @@ class Timezones(models.Model):
         db_table = 'timezones'
 
 
-class TopUpTransactions(models.Model):
-    user_id = models.IntegerField(blank=True, null=True)
-    permanent_user_id = models.IntegerField(blank=True, null=True)
+class TopUpTransaction(models.Model):
+
+    user = models.ForeignKey("User", on_delete=models.SET_NULL, blank=True, null=True)
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.SET_NULL, blank=True, null=True)
     permanent_user = models.CharField(max_length=255, blank=True, null=True)
     top_up_id = models.IntegerField(blank=True, null=True)
     type = models.CharField(max_length=11, blank=True, null=True)
@@ -2952,9 +3111,10 @@ class TopUpTransactions(models.Model):
         db_table = 'top_up_transactions'
 
 
-class TopUps(models.Model):
-    cloud_id = models.IntegerField(blank=True, null=True)
-    permanent_user_id = models.IntegerField(blank=True, null=True)
+class TopUp(models.Model):
+
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
+    permanent_user = models.ForeignKey("PermanentUser", on_delete=models.SET_NULL, blank=True, null=True)
     data = models.BigIntegerField(blank=True, null=True)
     time = models.IntegerField(blank=True, null=True)
     days_to_use = models.IntegerField(blank=True, null=True)
@@ -2968,7 +3128,8 @@ class TopUps(models.Model):
         db_table = 'top_ups'
 
 
-class UnknownDynamicClients(models.Model):
+class UnknownDynamicClient(models.Model):
+
     nasidentifier = models.CharField(unique=True, max_length=128)
     calledstationid = models.CharField(unique=True, max_length=128)
     last_contact = models.DateTimeField(blank=True, null=True)
@@ -2981,7 +3142,8 @@ class UnknownDynamicClients(models.Model):
         db_table = 'unknown_dynamic_clients'
 
 
-class UnknownNodes(models.Model):
+class UnknownNode(models.Model):
+
     mac = models.CharField(max_length=255)
     vendor = models.CharField(max_length=255, blank=True, null=True)
     from_ip = models.CharField(max_length=15)
@@ -3002,8 +3164,9 @@ class UnknownNodes(models.Model):
         db_table = 'unknown_nodes'
 
 
-class UserSettings(models.Model):
-    user_id = models.IntegerField()
+class UserSetting(models.Model):
+
+    user = models.ForeignKey("User", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -3014,7 +3177,8 @@ class UserSettings(models.Model):
         db_table = 'user_settings'
 
 
-class UserSsids(models.Model):
+class UserSsid(models.Model):
+
     username = models.CharField(max_length=64)
     ssidname = models.CharField(max_length=64)
     priority = models.IntegerField()
@@ -3024,8 +3188,9 @@ class UserSsids(models.Model):
         db_table = 'user_ssids'
 
 
-class UserStats(models.Model):
-    radacct_id = models.IntegerField()
+class UserStat(models.Model):
+
+    radacct = models.ForeignKey("Radacct", on_delete=models.CASCADE)
     username = models.CharField(max_length=64)
     realm = models.CharField(max_length=64, blank=True, null=True)
     nasipaddress = models.CharField(max_length=15)
@@ -3041,8 +3206,9 @@ class UserStats(models.Model):
         db_table = 'user_stats'
 
 
-class UserStatsDailies(models.Model):
-    user_stat_id = models.IntegerField()
+class UserStatsDaily(models.Model):
+
+    user_stat = models.ForeignKey("UserStat", on_delete=models.CASCADE)
     username = models.CharField(max_length=64)
     realm = models.CharField(max_length=64, blank=True, null=True)
     nasidentifier = models.CharField(max_length=64)
@@ -3056,7 +3222,8 @@ class UserStatsDailies(models.Model):
         db_table = 'user_stats_dailies'
 
 
-class Users(models.Model):
+class User(models.Model):
+
     username = models.CharField(max_length=255)
     password = models.CharField(max_length=50)
     token = models.CharField(max_length=36, blank=True, null=True)
@@ -3066,19 +3233,20 @@ class Users(models.Model):
     phone = models.CharField(max_length=50)
     email = models.CharField(max_length=100)
     active = models.IntegerField()
-    country_id = models.IntegerField(blank=True, null=True)
-    group_id = models.IntegerField()
-    language_id = models.IntegerField(blank=True, null=True)
+    country = models.ForeignKey("Country", on_delete=models.SET_NULL, blank=True, null=True)
+    group = models.ForeignKey("Group", on_delete=models.CASCADE)
+    language = models.ForeignKey("Language", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
-    timezone_id = models.IntegerField(blank=True, null=True)
+    timezone = models.ForeignKey("Timezone", on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'users'
 
 
-class Vouchers(models.Model):
+class Voucher(models.Model):
+
     name = models.CharField(unique=True, max_length=64, blank=True, null=True)
     batch = models.CharField(max_length=128)
     status = models.CharField(max_length=8, blank=True, null=True)
@@ -3089,7 +3257,7 @@ class Vouchers(models.Model):
     last_accept_nas = models.CharField(max_length=128, blank=True, null=True)
     last_reject_nas = models.CharField(max_length=128, blank=True, null=True)
     last_reject_message = models.CharField(max_length=255, blank=True, null=True)
-    cloud_id = models.IntegerField(blank=True, null=True)
+    cloud = models.ForeignKey("Cloud", on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField()
     modified = models.DateTimeField()
     extra_name = models.CharField(max_length=100)
@@ -3098,7 +3266,7 @@ class Vouchers(models.Model):
     realm = models.CharField(max_length=50)
     realm_id = models.IntegerField(blank=True, null=True)
     profile = models.CharField(max_length=50)
-    profile_id = models.IntegerField(blank=True, null=True)
+    profile = models.ForeignKey("Profile", on_delete=models.SET_NULL, blank=True, null=True)
     expire = models.DateTimeField(blank=True, null=True)
     time_valid = models.CharField(max_length=10)
     data_used = models.BigIntegerField(blank=True, null=True)
