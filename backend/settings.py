@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
+
 import environ
 from pathlib import Path
 
@@ -16,21 +17,21 @@ env = environ.Env(DEBUG=(bool, False))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(BASE_DIR / '.env')
+environ.Env.read_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 # Update CSRF_TRUSTED_ORIGINS to include your React app's domain
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 
 # CORS settings for development. For production, consider specifying CORS_ALLOWED_ORIGINS.
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # For development
@@ -45,18 +46,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'monitoring',
-    'users',
-    'payments',
-    'rest_framework',
-    'corsheaders',
-    'django_keycloak'
+    "monitoring",
+    "syncradius",
+    "rest_framework",
+    "corsheaders",
+    "django_keycloak",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -92,17 +92,25 @@ if DEBUG:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3"
-        }
+            "NAME": BASE_DIR / "db.sqlite3",
+        },
+        "rd": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "rd",
+            "USER": "rd",
+            "PASSWORD": "rd",
+            "HOST": "127.0.0.1",
+            "PORT": "3306",
+        },
     }
 else:
-    DATABASES = { "default": env.db() }
+    DATABASES = {"default": env.db()}
+
+DATABASE_ROUTERS = ["syncradius.db.RDRouter"]
 
 # Keycloak config
-AUTHENTICATION_BACKENDS = [
-    'django_keycloak.backends.KeycloakAuthorizationCodeBackend'
-]
-LOGIN_URL = 'keycloak_login'
+AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
+LOGIN_URL = "keycloak_login"
 AUTH_USER_MODEL = "django_keycloak.KeycloakUser"
 KEYCLOAK_CLIENT_DEFAULT = "manage-backend"
 KEYCLOAK_CLIENT_API = "manage-ui"
@@ -125,25 +133,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-PROMETHEUS_USERNAME = env('PROMETHEUS_USERNAME')
-PROMETHEUS_PASSWORD = env('PROMETHEUS_PASSWORD')
-PROMETHEUS_URL = env('PROMETHEUS_URL')
+PROMETHEUS_USERNAME = env("PROMETHEUS_USERNAME")
+PROMETHEUS_PASSWORD = env("PROMETHEUS_PASSWORD")
+PROMETHEUS_URL = env("PROMETHEUS_URL")
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'django_keycloak.backends.KeycloakDRFAuthentication',
-    ]
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "django_keycloak.backends.KeycloakDRFAuthentication",
+    ],
 }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'Africa/Johannesburg'
+TIME_ZONE = "Africa/Johannesburg"
 
 USE_I18N = True
 
