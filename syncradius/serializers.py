@@ -41,3 +41,10 @@ class ApSerializer(ModelSerializer):
         load = ap.apload_set.first()
         return load.mem_free / load.mem_total
 
+class UnknownNodeSerializer(ModelSerializer):
+    """Serializes UnknownNode objects from django model to JSON."""
+
+    class Meta:
+        """UnknownNodeSerializer metadata."""
+        model = models.UnknownNode
+        fields = "__all__"

@@ -7,5 +7,6 @@ router = DefaultRouter()
 router.register("meshes", views.MeshViewSet)
 router.register("nodes", views.NodeViewSet)
 router.register("aps", views.ApViewSet)
+router.register("unknown_nodes", views.UnknownNodeViewSet)
 
 urlpatterns = [path("", include(router.urls))]

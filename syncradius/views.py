@@ -18,6 +18,13 @@ class NodeViewSet(ModelViewSet):
     serializer_class = serializers.NodeSerializer
 
 
+class UnknownNodeViewSet(ModelViewSet):
+    """View/Edit/Add/Delete UnknownNode items."""
+
+    queryset = models.UnknownNode.objects.all()
+    serializer_class = serializers.UnknownNodeSerializer
+
+
 class ApViewSet(ModelViewSet):
     """View/Edit/Add/Delete AP items."""
 
