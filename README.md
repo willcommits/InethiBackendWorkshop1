@@ -23,7 +23,23 @@ The management backend uses some 'external' services for config, authentication 
 
 Keycloak manages user authorisation and authentication on both the backend and frontend.
 
-Follow the instructions at https://www.keycloak.org/getting-started/getting-started-docker for getting a local keycloak server up and running in a Docker container. Call the new realm you create 'inethi-global-services' and add an admin user. Assign this user a new role, called 'admin' - this is crucial for authentication with the backend.
+Follow the instructions at https://www.keycloak.org/getting-started/getting-started-docker for getting a local keycloak server up and running in a Docker container. Create a new realm called 'inethi-global-services'. You'll need to add two new clients, one for the backend and one for the frontend, so that both can log in via keycloak.
+
+Frontend: Add a client with ID 'manage-ui'. Leave most of the settings as they are i.e. no client authentication, standard flow etc. This is a public client, because the keycloak.js client doesn't support confidential clients. You'll have to configure some URLs, assuming the frontend is running at `http://localhost:3000`:
+
+1. Home URL: `http://localhost:3000`
+2. Valid Redirect URLs: `http://localhost:3000/*`
+3. Valid post logout redirect URIs: `+` (Same as redirect URLs)
+4. Web Origins: `+`
+
+Backend: Add a client with ID 'manage-backend'. This can be a private client, so client authentication and authorization are checked. Similarly, you want to configure redirect urls, this time using the backend url:
+
+1. Home URL: `http://localhost:8000`
+2. Valid Redirect URLs: `http://localhost:8000/*`
+3. Valid post logout redirect URIs: `+`
+4. Web Origins: `+`
+
+Lastly and add an admin user with a username of your choice. Assign this user a new role, called 'admin'. This user will be able to log in to the backend to access Django's admin interface.
 
 #### Radiusdesk
 
@@ -44,7 +60,16 @@ If you're running the backend for the first time, you will have to migrate chang
 ```bash
 python manage.py migrate
 ```
-You may also want to create an admin user with the `createsuperuser` django command.
+
+You need to configure the backend to communicate with the keycloak server by registering both frontend and backend clients. Begin by registering the test realm, supplying its root URL `http://localhost:8080` (don't forget the protocol specifier!!)
+```bash
+python manage.py set_realm inethi-global-services
+```
+And then adding two clients (you'll need to copy the client secret for the backend's client):
+```bash
+python manage.py add_client manage-ui
+python manage.py add_client manage-backend
+```
 
 Now you can run the server, using
 ```bash
