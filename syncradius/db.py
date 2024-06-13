@@ -25,4 +25,4 @@ class RDRouter(object):
         Make sure the auth and contenttypes apps only appear in the
         default database.
         """
-        return False
+        return db != "rd"
