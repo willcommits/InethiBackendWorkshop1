@@ -11,6 +11,8 @@ cryptography==42.0.7
 daphne==4.1.2
 deprecation==2.1.0
 Django==5.0.6
+django-cors-headers==4.3.1
+django-environ==0.11.2
 -e git+https://github.com/ErikPolzin/django-keycloak.git@a1672b718bc85f86e6e55d1383f4b46cd3634710#egg=django_keycloak
 django-rest-framework==0.1.0
 djangorestframework==3.15.1
@@ -18,12 +20,14 @@ hyperlink==21.0.0
 idna==3.7
 incremental==22.10.0
 jwcrypto==1.5.6
+mysqlclient==2.2.4
 packaging==24.0
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
 pycparser==2.22
 pyOpenSSL==24.1.0
 python-keycloak==4.0.0
+PyYAML==6.0.1
 requests==2.32.3
 requests-toolbelt==1.0.0
 service-identity==24.1.0
