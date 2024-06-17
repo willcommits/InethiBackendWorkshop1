@@ -513,6 +513,9 @@ class ApUptmHistory(models.Model):
         managed = False
         db_table = 'ap_uptm_histories'
 
+    def __str__(self):
+        return f"{self.state_datetime}: {self.ap} {'UP' if self.ap_state else 'DOWN'}"
+
 
 class ApWifiSetting(models.Model):
 
@@ -525,6 +528,9 @@ class ApWifiSetting(models.Model):
     class Meta:
         managed = False
         db_table = 'ap_wifi_settings'
+
+    def __str__(self):
+        return f"WiFi Setting for {self.ap}: {self.name}={self.value}"
 
 
 class AppliedFupComponent(models.Model):
@@ -569,6 +575,9 @@ class Ap(models.Model):
     class Meta:
         managed = False
         db_table = 'aps'
+
+    def __str__(self):
+        return f"AP Node '{self.name}' [{self.mac}]"
 
 
 class ArMeshDailySummary(models.Model):
@@ -2151,6 +2160,9 @@ class NodeUptmHistory(models.Model):
         managed = False
         db_table = 'node_uptm_histories'
 
+    def __str__(self):
+        return f"{self.state_datetime}: {self.node} {'UP' if self.node_state else 'DOWN'}"
+
 
 class NodeWifiSetting(models.Model):
 
@@ -2163,6 +2175,9 @@ class NodeWifiSetting(models.Model):
     class Meta:
         managed = False
         db_table = 'node_wifi_settings'
+
+    def __str__(self):
+        return f"WiFi Setting for {self.node}: {self.name}={self.value}"
 
 
 class Node(models.Model):
@@ -2206,6 +2221,9 @@ class Node(models.Model):
     class Meta:
         managed = False
         db_table = 'nodes'
+
+    def __str__(self):
+        return f"Mesh Node '{self.name}' [{self.mac}]"
 
 
 class Notification(models.Model):
