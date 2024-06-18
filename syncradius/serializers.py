@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from dynamic_fields.serializers import DynamicFieldsModelSerializer
 
 from . import models
 
@@ -48,7 +49,7 @@ class MeshSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class NodeSerializer(ModelSerializer):
+class NodeSerializer(DynamicFieldsModelSerializer):
     """Serializes Node objects from django model to JSON."""
 
     memory_usage = SerializerMethodField()
@@ -67,7 +68,7 @@ class NodeSerializer(ModelSerializer):
         return load.mem_free / load.mem_total
 
 
-class ApSerializer(ModelSerializer):
+class ApSerializer(DynamicFieldsModelSerializer):
     """Serializes Access Point objects from django model to JSON."""
 
     memory_usage = SerializerMethodField()

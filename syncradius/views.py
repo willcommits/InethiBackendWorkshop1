@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from dynamic_fields.mixins import DynamicFieldsViewMixin
 
 from . import models
 from . import serializers
@@ -11,7 +12,7 @@ class MeshViewSet(ModelViewSet):
     serializer_class = serializers.MeshSerializer
 
 
-class NodeViewSet(ModelViewSet):
+class NodeViewSet(DynamicFieldsViewMixin, ModelViewSet):
     """View/Edit/Add/Delete Node items."""
 
     queryset = models.Node.objects.all()
@@ -25,7 +26,7 @@ class UnknownNodeViewSet(ModelViewSet):
     serializer_class = serializers.UnknownNodeSerializer
 
 
-class ApViewSet(ModelViewSet):
+class ApViewSet(DynamicFieldsViewMixin, ModelViewSet):
     """View/Edit/Add/Delete AP items."""
 
     queryset = models.Ap.objects.all()
