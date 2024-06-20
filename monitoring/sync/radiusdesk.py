@@ -1,4 +1,5 @@
 """Sync with a radiusdesk database."""
+
 import time
 
 from mysql.connector import connect
@@ -46,31 +47,34 @@ JOIN aps a
 ON l.ap_id = a.id;
 """
 GET_NODE_AND_AP_UPTIME_HISTORY_QUERY = """
-SELECT n.mac, h.node_state, h.state_datetime, h.report_datetime, h.created, h.id
+SELECT n.mac, h.node_state h.created, h.id
 FROM node_uptm_histories h
 JOIN nodes n
 ON h.node_id = n.id;
-SELECT a.mac, h.ap_state, h.state_datetime, h.report_datetime, h.created, h.id
+SELECT a.mac, h.ap_state, h.id
 FROM ap_uptm_histories h
 JOIN aps a
 ON h.ap_id = a.id;
 """
 
 
-def log_output_of_sync(ModelType):
+def bulk_sync(ModelType, delete=True):
     """Log output for sync, with number of added, updated and deleted models."""
 
     def outer(syncfunc):
         def inner(cursor):
             ids_to_delete = set(ModelType.objects.values_list("pk", flat=True))
             n_added, n_updated = 0, 0
-            for model, created in syncfunc(cursor):
+            for defaults, kwargs in syncfunc(cursor):
+                model, created = ModelType.objects.update_or_create(defaults, **kwargs)
                 if created:
                     n_added += 1
                 else:
                     n_updated += 1
                 ids_to_delete.discard(model.pk)
-            n_deleted, _ = ModelType.objects.filter(pk__in=ids_to_delete).delete()
+            n_deleted = 0
+            if delete:
+                n_deleted, _ = ModelType.objects.filter(pk__in=ids_to_delete).delete()
             print(
                 f"Updated {ModelType.__name__:>12} models ({n_added} created, {n_updated} updated, {n_deleted} deleted)"
             )
@@ -80,7 +84,7 @@ def log_output_of_sync(ModelType):
     return outer
 
 
-@log_output_of_sync(Cloud)
+@bulk_sync(Cloud)
 def sync_clouds(cursor):
     cursor.execute(GET_CLOUDS_QUERY)
     for row in cursor.fetchall():
@@ -90,10 +94,10 @@ def sync_clouds(cursor):
             lng=row[3],
             created=make_aware(row[4]),
         )
-        yield Cloud.objects.update_or_create(name=row[0], defaults=data)
+        yield data, {"name": row[0]}
 
 
-@log_output_of_sync(Mesh)
+@bulk_sync(Mesh)
 def sync_meshes(cursor):
     cursor.execute(GET_MESHES_QUERY)
     for row in cursor.fetchall():
@@ -102,10 +106,11 @@ def sync_meshes(cursor):
             cloud=Cloud.objects.get(name=row[2]),
             created=make_aware(row[3]),
         )
-        yield Mesh.objects.update_or_create(name=row[0], defaults=data)
+        yield data, {"name": row[0]}
 
 
-@log_output_of_sync(Node)
+# The nodes that are out of sync mustn't be deleted, they can be potentially added to radiusdesk later
+@bulk_sync(Node, delete=False)
 def sync_nodes(cursor):
     for result in cursor.execute(GET_NODES_AND_APS_QUERY, multi=True):
         for row in result.fetchall():
@@ -124,10 +129,10 @@ def sync_nodes(cursor):
                 config_fetched=make_aware(row[10]),
                 last_contact_from_ip=row[11],
             )
-            yield Node.objects.update_or_create(name=row[1], defaults=data)
+            yield data, {"name": row[1]}
 
 
-@log_output_of_sync(NodeStation)
+@bulk_sync(NodeStation)
 def sync_node_stations(cursor):
     for result in cursor.execute(GET_NODE_AND_AP_STATIONS_QUERY, multi=True):
         for row in result.fetchall():
@@ -148,10 +153,10 @@ def sync_node_stations(cursor):
                 signal_avg=row[13],
                 created=make_aware(row[14]),
             )
-            yield NodeStation.objects.update_or_create(pk=row[15], defaults=data)
+            yield data, {"pk": row[15]}
 
 
-@log_output_of_sync(NodeLoad)
+@bulk_sync(NodeLoad)
 def sync_node_loads(cursor):
     for result in cursor.execute(GET_NODE_AND_AP_LOADS_QUERY, multi=True):
         for row in result.fetchall():
@@ -163,21 +168,20 @@ def sync_node_loads(cursor):
                 system_time=row[4],
                 created=make_aware(row[5]),
             )
-            yield NodeLoad.objects.update_or_create(pk=row[6], defaults=data)
+            yield data, {"pk": row[6]}
 
 
-@log_output_of_sync(UptimeMetric)
+@bulk_sync(UptimeMetric)
 def sync_node_uptime_metrics(cursor):
     for result in cursor.execute(GET_NODE_AND_AP_UPTIME_HISTORY_QUERY, multi=True):
         for row in result.fetchall():
             data = dict(
                 node=Node.objects.get(mac=row[0]),
-                node_state=row[1],
-                state_datetime=make_aware(row[2]),
-                report_datetime=make_aware(row[3]),
-                created=make_aware(row[4])
+                reachable=row[1],
+                loss=0 if row[1] else 100,
+                created=make_aware(row[2]),
             )
-            yield UptimeMetric.objects.update_or_create(pk=row[5], defaults=data)
+            yield data, {"pk": row[5]}
 
 
 def run():
@@ -195,6 +199,6 @@ def run():
             sync_nodes(cursor)
             sync_node_stations(cursor)
             sync_node_loads(cursor)
-            sync_node_uptime_metrics(cursor)
+            # sync_node_uptime_metrics(cursor)
             elapsed_time = time.time() - start_time
             print(f"Synced with radiusdesk in {elapsed_time:.2f}s")
