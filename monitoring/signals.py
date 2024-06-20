@@ -6,7 +6,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.conf import settings
 
-from .models import NetworkDevice
+from .models import Node
 
 
 def reload_prometheus():
@@ -15,11 +15,10 @@ def reload_prometheus():
     password = settings.PROMETHEUS_PASSWORD
     url = settings.PROMETHEUS_URL
     # response = requests.post(url, auth=HTTPBasicAuth(username, password))
-    print(f"Reloaded Prometheus")
 
 def sync_prometheus_data_to_yml():
     """Sync the IP addresses currently in the database to YAML config."""
-    ip_addresses = NetworkDevice.objects.values_list("ip_address", flat=True)
+    ip_addresses = Node.objects.values_list("ip", flat=True)
     prometheus_path = settings.BASE_DIR / 'prometheus.yml'
 
     with open(prometheus_path, 'r', encoding="utf-8") as prometheus_file:
@@ -37,14 +36,14 @@ def sync_prometheus_data_to_yml():
         yaml.dump(prometheus_data, file, sort_keys=False)
 
 
-@receiver(post_save, sender=NetworkDevice)
+@receiver(post_save, sender=Node)
 def update_prometheus_targets(sender, **kwargs):
     """Update prometheus targets when network devices are added or modified."""
     sync_prometheus_data_to_yml()
     reload_prometheus()
 
 
-@receiver(post_delete, sender=NetworkDevice)
+@receiver(post_delete, sender=Node)
 def remove_prometheus_targets(**kwargs):
     """Update prometheus targets when network devices are deleted."""
     sync_prometheus_data_to_yml()

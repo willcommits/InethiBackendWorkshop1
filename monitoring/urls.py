@@ -1,11 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import NetworkDeviceViewSet, ServiceViewSet, AlertsViewSet
+from . import views
 
 router = DefaultRouter()
-router.register(r'devices', NetworkDeviceViewSet)
-router.register(r'services', ServiceViewSet)
-router.register(r'alerts', AlertsViewSet)
+router.register("devices", views.NodeViewSet)
+router.register("services", views.ServiceViewSet)
+router.register("alerts", views.AlertsViewSet)
+router.register("meshes", views.MeshViewSet)
+router.register("unknown_nodes", views.UnknownNodeViewSet)
 
-urlpatterns = [ path('', include(router.urls)) ]
+urlpatterns = [path("", include(router.urls))]

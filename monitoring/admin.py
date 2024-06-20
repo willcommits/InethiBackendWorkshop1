@@ -1,18 +1,24 @@
 from django.contrib import admin
 
-from .models import NetworkDevice, Service, Alert
+from . import models
 
 
-@admin.register(NetworkDevice)
-class NetworkDeviceAdmin(admin.ModelAdmin):
+@admin.register(models.Node)
+class NodeAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'device_type', 'ip_address')
+    list_display = ('name', 'hardware', 'ip')
 
 
-@admin.register(Service)
+@admin.register(models.Service)
 class NetworkDeviceAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'url', 'service_type', 'api_location')
 
 
-admin.site.register(Alert)
+admin.site.register(models.Alert)
+admin.site.register(models.Cloud)
+admin.site.register(models.Mesh)
+admin.site.register(models.NodeLoad)
+admin.site.register(models.NodeStation)
+admin.site.register(models.UptimeMetric)
+admin.site.register(models.UnknownNode)

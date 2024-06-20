@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "monitoring",
-    "syncradius",
     "rest_framework",
     "corsheaders",
     "django_keycloak",
@@ -93,20 +92,17 @@ if DEBUG:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
-        },
-        "rd": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": "rd",
-            "USER": "rd",
-            "PASSWORD": "rd",
-            "HOST": "127.0.0.1",
-            "PORT": "3306",
-        },
+        }
     }
 else:
     DATABASES = {"default": env.db()}
 
-DATABASE_ROUTERS = ["syncradius.db.RDRouter"]
+# Radiusdesk config
+RD_DB_NAME = "rd"
+RD_DB_USER = "rd"
+RD_DB_PASSWORD = "rd"
+RD_DB_HOST = "localhost"
+RD_DB_PORT = "3306"
 
 # Keycloak config
 AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
