@@ -101,13 +101,15 @@ class UptimeMetric(models.Model):
         null=True,
         related_name="uptime_metrics",
     )
-    node_state = models.BooleanField()
-    state_datetime = models.DateTimeField()
-    report_datetime = models.DateTimeField()
-    created = models.DateTimeField()
+    reachable = models.BooleanField()
+    loss = models.IntegerField()
+    rtt_min = models.FloatField(null=True, blank=True)
+    rtt_avg = models.FloatField(null=True, blank=True)
+    rtt_max = models.FloatField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Node Uptime {self.node.name}: {'UP' if self.node_state else 'DOWN'} [{self.created}]"
+        return f"Node Uptime {self.node.name}: {'UP' if self.reachable else 'DOWN'} [{self.created}]"
 
 
 class UnknownNode(models.Model):

@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import environ
+from datetime import timedelta
 from pathlib import Path
 
-env = environ.Env(DEBUG=(bool, False))
+env = environ.Env(DEBUG=(bool, False), REDIS_HOST=(str, "localhost"))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -161,3 +162,19 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Celery config
+CELERY_BROKER_URL = f"redis://{env('REDIS_HOST')}:6379/0"
+CELERY_RESULT_BACKEND = f"redis://{env('REDIS_HOST')}:6379/0"
+# Celery TIME_ZONE should be equal to django TIME_ZONE
+# In order to schedule run_iperf3_checks on the correct time intervals
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = False
+
+CELERY_BEAT_SCHEDULE = {
+    "ping_schedule": {
+        "task": "monitoring.tasks.run_pings",
+        # Executes ping every 5 min
+        "schedule": timedelta(minutes=5)
+    }
+}
