@@ -6,7 +6,7 @@ from mysql.connector import connect
 from django.conf import settings
 from django.utils.timezone import make_aware
 
-from monitoring.models import Cloud, Mesh, Node, NodeStation, NodeLoad, UptimeMetric
+from monitoring.models import Cloud, Mesh, Node, NodeStation, NodeLoad, UptimeMetric, UnknownNode
 
 
 GET_CLOUDS_QUERY = """
@@ -56,6 +56,10 @@ FROM ap_uptm_histories h
 JOIN aps a
 ON h.ap_id = a.id;
 """
+GET_UNKNOWN_NODES_QUERY = """
+SELECT u.mac, u.vendor, u.from_ip, u.gateway, u.last_contact, u.created, u.name
+FROM unknown_nodes u;
+"""
 
 
 def bulk_sync(ModelType, delete=True):
@@ -75,9 +79,8 @@ def bulk_sync(ModelType, delete=True):
             n_deleted = 0
             if delete:
                 n_deleted, _ = ModelType.objects.filter(pk__in=ids_to_delete).delete()
-            print(
-                f"Updated {ModelType.__name__:>12} models ({n_added} created, {n_updated} updated, {n_deleted} deleted)"
-            )
+            print(f"Updated {ModelType.__name__:>12} models "
+                  f"({n_added} created, {n_updated} updated, {n_deleted} deleted)")
 
         return inner
 
@@ -184,6 +187,21 @@ def sync_node_uptime_metrics(cursor):
             yield data, {"pk": row[5]}
 
 
+@bulk_sync(UnknownNode)
+def sync_unknown_nodes(cursor):
+    cursor.execute(GET_UNKNOWN_NODES_QUERY)
+    for row in cursor.fetchall():
+        data = dict(
+            vendor=row[1],
+            from_ip=row[2],
+            gateway=row[3],
+            last_contact=make_aware(row[4]),
+            created=make_aware(row[5]),
+            name=row[6]
+        )
+        yield data, {"mac": row[0]}
+
+
 def run():
     with connect(
         host=settings.RD_DB_HOST,
@@ -199,6 +217,7 @@ def run():
             sync_nodes(cursor)
             sync_node_stations(cursor)
             sync_node_loads(cursor)
+            sync_unknown_nodes(cursor)
             # sync_node_uptime_metrics(cursor)
             elapsed_time = time.time() - start_time
             print(f"Synced with radiusdesk in {elapsed_time:.2f}s")
