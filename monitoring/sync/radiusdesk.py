@@ -191,6 +191,10 @@ def sync_node_uptime_metrics(cursor):
 def sync_unknown_nodes(cursor):
     cursor.execute(GET_UNKNOWN_NODES_QUERY)
     for row in cursor.fetchall():
+        # If there already exists a node with the same MAC, don't
+        # create a new UnknownNode
+        if Node.objects.filter(mac=row[0]).exists():
+            continue
         data = dict(
             vendor=row[1],
             from_ip=row[2],

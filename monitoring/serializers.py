@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField, PrimaryKeyRelatedField
 from dynamic_fields.serializers import DynamicFieldsModelSerializer
 
 from .models import Node, Service, Alert, UptimeMetric, NodeStation, Mesh, UnknownNode
@@ -42,6 +42,7 @@ class NodeSerializer(DynamicFieldsModelSerializer):
     memory_usage = SerializerMethodField()
     uptime_metrics = UptimeMetricSerializer(many=True, read_only=True)
     stations = NodeStationSerializer(many=True, read_only=True)
+    neighbours = PrimaryKeyRelatedField(many=True, read_only=True)
 
     def get_memory_usage(self, node: Node) -> float:
         load = node.loads.first()

@@ -33,7 +33,7 @@ class Node(models.Model):
     mesh = models.ForeignKey(Mesh, on_delete=models.SET_NULL, blank=True, null=True)
     neighbours = models.ManyToManyField("Node")
     name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, null=True, blank=True)
     mac = models.CharField(max_length=255, primary_key=True)
     hardware = models.CharField(max_length=255, blank=True, null=True)
     ip = models.CharField(max_length=255, blank=True, null=True)
@@ -42,7 +42,7 @@ class Node(models.Model):
     lon = models.FloatField(blank=True, null=True)
     created = models.DateTimeField()
     config_fetched = models.DateTimeField(blank=True, null=True)
-    last_contact_from_ip = models.CharField(max_length=30)
+    last_contact_from_ip = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
         return f"Node {self.name} ({self.mac})"
