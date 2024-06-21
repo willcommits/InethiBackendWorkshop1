@@ -176,5 +176,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "monitoring.tasks.run_pings",
         # Executes ping every 5 min
         "schedule": timedelta(minutes=5)
+    },
+    "syncrd_schedule": {
+        "task": "monitoring.tasks.run_syncrd",
+        # Executes db sync every 15 min
+        "schedule": timedelta(minutes=15)
     }
 }
