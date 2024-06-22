@@ -10,4 +10,4 @@ router.register("alerts", views.AlertsViewSet)
 router.register("meshes", views.MeshViewSet)
 router.register("unknown_nodes", views.UnknownNodeViewSet)
 
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = [path("", include(router.urls)), path("overview/", views.overview)]

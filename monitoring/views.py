@@ -1,8 +1,21 @@
 
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+from .models import Node
 from . import models
 from . import serializers
+
+
+@api_view()
+def overview(request):
+    return Response({
+        "n_nodes": Node.objects.count(),
+        "n_positioned_nodes": Node.objects.filter(lat__isnull=False, lon__isnull=False).count(),
+        "n_unknown_nodes": models.UnknownNode.objects.count(),
+        "n_ok_nodes": len([n for n in Node.objects.all() if n.status == Node.Status.OK]),  # TODO very inefficient
+    })
 
 
 class NodeViewSet(ModelViewSet):
