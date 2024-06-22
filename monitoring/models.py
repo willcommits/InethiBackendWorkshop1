@@ -31,7 +31,7 @@ class Node(models.Model):
     )
 
     mesh = models.ForeignKey(Mesh, on_delete=models.SET_NULL, blank=True, null=True)
-    neighbours = models.ManyToManyField("Node")
+    neighbours = models.ManyToManyField("Node", blank=True)
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
     mac = models.CharField(max_length=255, primary_key=True)

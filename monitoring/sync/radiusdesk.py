@@ -4,7 +4,7 @@ import time
 
 from mysql.connector import connect
 from django.conf import settings
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware as _make_aware
 
 from monitoring.models import Cloud, Mesh, Node, NodeStation, NodeLoad, UptimeMetric, UnknownNode
 
@@ -60,6 +60,9 @@ GET_UNKNOWN_NODES_QUERY = """
 SELECT u.mac, u.vendor, u.from_ip, u.gateway, u.last_contact, u.created, u.name
 FROM unknown_nodes u;
 """
+
+# Make aware, but allow for null values
+make_aware = lambda dt: _make_aware(dt) if dt else None
 
 
 def bulk_sync(ModelType, delete=True):
