@@ -1,3 +1,5 @@
+import enum
+from datetime import datetime, timedelta, timezone
 from django.db import models
 
 
@@ -21,6 +23,13 @@ class Mesh(models.Model):
 class Node(models.Model):
     """Database table for network devices."""
 
+    class Status(enum.Enum):
+
+        UNKNOWN = "Unknown"
+        INACTIVE = "Inactive"
+        UNREACHABLE = "Unreachable"
+        OK = "Ok"
+
     DEVICE_TYPES = (
         ("switch", "Switch"),
         ("access_point", "Access Point"),
@@ -43,6 +52,20 @@ class Node(models.Model):
     created = models.DateTimeField()
     config_fetched = models.DateTimeField(blank=True, null=True)
     last_contact_from_ip = models.CharField(max_length=30, null=True, blank=True)
+
+    @property
+    def status(self) -> Status:
+        last_uptime_metric = self.uptime_metrics.order_by("-created").first()
+        # BUG must fixe native timedeltas from rd sync
+        now = datetime.now(timezone.utc)
+        if last_uptime_metric is None:
+            return Node.Status.UNKNOWN
+        # TODO: Make this configurable
+        elif (now - last_uptime_metric.created) > timedelta(days=1):
+            return Node.Status.INACTIVE
+        elif not last_uptime_metric.reachable:
+            return Node.Status.UNREACHABLE
+        return Node.Status.OK
 
     def __str__(self):
         return f"Node {self.name} ({self.mac})"
@@ -74,6 +97,9 @@ class NodeStation(models.Model):
 
 class NodeLoad(models.Model):
 
+    class Meta:
+        ordering = ['created']
+
     node = models.ForeignKey(
         Node, on_delete=models.SET_NULL, blank=True, null=True, related_name="loads"
     )
@@ -93,6 +119,9 @@ class NodeLoad(models.Model):
 
 
 class UptimeMetric(models.Model):
+
+    class Meta:
+        ordering = ['created']
 
     node = models.ForeignKey(
         Node,
