@@ -109,8 +109,18 @@ RD_DB_PORT = "3306"
 AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
 LOGIN_URL = "keycloak_login"
 AUTH_USER_MODEL = "django_keycloak.KeycloakUser"
-KEYCLOAK_CLIENT_DEFAULT = "manage-backend"
-KEYCLOAK_CLIENT_API = "manage-ui"
+KEYCLOAK_AUTH = {
+    "URL": env("KEYCLOAK_URL"),
+    "REALM": env("KEYCLOAK_REALM"),
+    "CLIENT_ID": env("KEYCLOAK_CLIENT_ID"),
+    "CLIENT_SECRET": env("KEYCLOAK_CLIENT_SECRET")
+}
+DRF_KEYCLOAK_AUTH = {
+    "URL": env("KEYCLOAK_URL"),
+    "REALM": env("KEYCLOAK_REALM"),
+    "CLIENT_ID": env("DRF_KEYCLOAK_CLIENT_ID"),
+    "CLIENT_SECRET": None
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -139,7 +149,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "django_keycloak.backends.KeycloakDRFAuthentication",
+        "django_keycloak.authentication.KeycloakDRFAuthentication",
     ],
 }
 

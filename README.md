@@ -61,14 +61,14 @@ If you're running the backend for the first time, you will have to migrate chang
 python manage.py migrate
 ```
 
-You need to configure the backend to communicate with the keycloak server by registering both frontend and backend clients. Begin by registering the test realm, supplying its root URL `http://localhost:8080` (don't forget the protocol specifier!!)
+You need to configure the backend to communicate with the keycloak server by registering both frontend and backend clients in the .env file, for example:
 ```bash
-python manage.py set_realm inethi-global-services
-```
-And then adding two clients (you'll need to copy the client secret for the backend's client):
-```bash
-python manage.py add_client manage-ui
-python manage.py add_client manage-backend
+KEYCLOAK_URL="http://localhost:8000"
+KEYCLOAK_REALM="inethi-global-services"
+KEYCLOAK_CLIENT_ID="manage-backend"
+DRF_KEYCLOAK_CLIENT_ID="manage-ui"
+DRF_KEYCLOAK_CLIENT_SECRET=
+KEYCLOAK_CLIENT_SECRET="<CLIENT_SECRET>"
 ```
 
 Now you can run the server, using
