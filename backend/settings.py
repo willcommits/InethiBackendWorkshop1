@@ -105,6 +105,12 @@ RD_DB_USER = "rd"
 RD_DB_PASSWORD = "rd"
 RD_DB_HOST = "localhost"
 RD_DB_PORT = "3306"
+# UNIFI config
+UNIFI_DB_NAME = "ace"
+UNIFI_DB_USER = ""
+UNIFI_DB_PASSWORD = ""
+UNIFI_DB_HOST = "localhost"
+UNIFI_DB_PORT = "27117"
 
 # Keycloak config
 AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
@@ -190,6 +196,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     "syncrd_schedule": {
         "task": "monitoring.tasks.run_syncrd",
+        # Executes db sync every 15 min
+        "schedule": timedelta(minutes=15)
+    },
+    "syncunifi_schedule": {
+        "task": "monitoring.tasks.run_syncunifi",
         # Executes db sync every 15 min
         "schedule": timedelta(minutes=15)
     }
