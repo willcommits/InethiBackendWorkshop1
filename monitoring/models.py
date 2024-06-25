@@ -1,5 +1,6 @@
 import enum
 from datetime import datetime, timedelta
+from django.utils import timezone
 from django.db import models
 
 
@@ -38,7 +39,7 @@ class Node(models.Model):
     def status(self) -> Status:
         """Node status, based of the last uptime metric."""
         last_uptime_metric = self.uptime_metrics.order_by("-created").first()
-        now = datetime.now()
+        now = timezone.now()
         if last_uptime_metric is None:
             return Node.Status.UNKNOWN
         # TODO: Make this configurable
