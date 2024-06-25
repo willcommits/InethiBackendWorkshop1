@@ -17,12 +17,10 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from django.shortcuts import redirect
 
 urlpatterns = [
-    path("", lambda _: redirect("admin/")),
+    path("admin/", include("django_keycloak.urls")),
     path("admin/", admin.site.urls),
     path("monitoring/", include("monitoring.urls")),
     path("metrics/", include("metrics.urls")),
-    path("keycloak/", include("django_keycloak.urls")),
 ]

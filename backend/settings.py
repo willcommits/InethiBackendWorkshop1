@@ -114,19 +114,18 @@ UNIFI_DB_PORT = "27117"
 
 # Keycloak config
 AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
-LOGIN_URL = "keycloak_login"
 AUTH_USER_MODEL = "django_keycloak.KeycloakUser"
 KEYCLOAK_AUTH = {
     "URL": env("KEYCLOAK_URL"),
     "REALM": env("KEYCLOAK_REALM"),
     "CLIENT_ID": env("KEYCLOAK_CLIENT_ID"),
-    "CLIENT_SECRET": env("KEYCLOAK_CLIENT_SECRET")
+    "CLIENT_SECRET": env("KEYCLOAK_CLIENT_SECRET"),
 }
 DRF_KEYCLOAK_AUTH = {
     "URL": env("KEYCLOAK_URL"),
     "REALM": env("KEYCLOAK_REALM"),
     "CLIENT_ID": env("DRF_KEYCLOAK_CLIENT_ID"),
-    "CLIENT_SECRET": None
+    "CLIENT_SECRET": None,
 }
 
 # Password validation
@@ -156,6 +155,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
         "django_keycloak.authentication.KeycloakDRFAuthentication",
     ],
 }
@@ -192,16 +192,16 @@ CELERY_BEAT_SCHEDULE = {
     "ping_schedule": {
         "task": "metrics.tasks.run_pings",
         # Executes ping every 5 min
-        "schedule": timedelta(minutes=5)
+        "schedule": timedelta(minutes=5),
     },
     "syncrd_schedule": {
         "task": "monitoring.tasks.run_syncrd",
         # Executes db sync every 15 min
-        "schedule": timedelta(minutes=15)
+        "schedule": timedelta(minutes=15),
     },
     "syncunifi_schedule": {
         "task": "monitoring.tasks.run_syncunifi",
         # Executes db sync every 15 min
-        "schedule": timedelta(minutes=15)
-    }
+        "schedule": timedelta(minutes=15),
+    },
 }
