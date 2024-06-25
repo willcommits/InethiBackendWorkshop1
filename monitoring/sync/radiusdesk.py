@@ -5,7 +5,7 @@ import time
 
 from mysql.connector import connect
 from django.conf import settings
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 
 from monitoring.models import Mesh, Node, UnknownNode
 from metrics.models import FailuresMetric, ResourcesMetric, DataUsageMetric
@@ -164,7 +164,7 @@ def sync_node_resources_metrics(cursor):
                 memory=mem_free/mem_total*100,
                 cpu=-1,  # Radiusdesk doesn't track CPU usage??
             )
-            yield data, {}
+            yield data, {"created": now()}
 
 
 def run():
