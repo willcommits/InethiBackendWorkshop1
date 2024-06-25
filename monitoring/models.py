@@ -52,7 +52,7 @@ class Node(models.Model):
     @property
     def last_contact(self) -> datetime | None:
         """Datetime of last contact."""
-        last_uptime_metric = self.uptime_metrics.order_by("-created").first()
+        last_uptime_metric = self.uptime_metrics.filter(reachable=True).order_by("-created").first()
         if last_uptime_metric is None:
             return None
         return last_uptime_metric.created
