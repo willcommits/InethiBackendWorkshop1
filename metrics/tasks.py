@@ -9,7 +9,7 @@ logger = get_task_logger(__name__)
 
 @shared_task
 def run_pings():
-    for device in Node.objects.filter(last_contact_from_ip__isnull=False):
+    for device in Node.objects.filter(ip__isnull=False):
         ping_data = ping(device.ip)
         rtt_data = ping_data.pop("rtt", None)
         UptimeMetric.objects.create(node=device, **ping_data)
