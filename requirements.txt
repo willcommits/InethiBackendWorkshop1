@@ -21,9 +21,10 @@ deprecation==2.1.0
 Django==5.0.6
 django-cors-headers==4.3.1
 django-environ==0.11.2
--e git+https://github.com/ErikPolzin/django-keycloak.git@cdde0d8276e55f5f95f15a1d570406557ead7c52#egg=django_keycloak
+-e git+https://github.com/ErikPolzin/django-keycloak.git@cef8620d0424be050f359485db748ace00f58093#egg=django_keycloak
 django-rest-framework==0.1.0
 djangorestframework==3.15.1
+dnspython==2.6.1
 -e git+https://github.com/ErikPolzin/drf-dynamic-fields@f2f285a3402d28055a71266277673739e79e4533#egg=drf_dynamic_fields
 hyperlink==21.0.0
 idna==3.7
@@ -37,6 +38,7 @@ prompt_toolkit==3.0.47
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
 pycparser==2.22
+pymongo==4.7.3
 pyOpenSSL==24.1.0
 python-dateutil==2.9.0.post0
 python-keycloak==4.0.0
