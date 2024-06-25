@@ -16,9 +16,5 @@ class NetworkDeviceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Alert)
-admin.site.register(models.Cloud)
 admin.site.register(models.Mesh)
-admin.site.register(models.NodeLoad)
-admin.site.register(models.NodeStation)
-admin.site.register(models.UptimeMetric)
 admin.site.register(models.UnknownNode)

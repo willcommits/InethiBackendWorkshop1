@@ -21,8 +21,8 @@ from django.shortcuts import redirect
 
 urlpatterns = [
     path("", lambda _: redirect("admin/")),
-    path("admin/login/", lambda request: redirect("keycloak_login")),
     path("admin/", admin.site.urls),
     path("monitoring/", include("monitoring.urls")),
+    path("metrics/", include("metrics.urls")),
     path("keycloak/", include("django_keycloak.urls")),
 ]

@@ -1,212 +1,170 @@
 """Sync with a radiusdesk database."""
 
+import pytz
 import time
 
 from mysql.connector import connect
 from django.conf import settings
-from django.utils.timezone import make_aware as _make_aware
+from django.utils.timezone import make_aware
 
-from monitoring.models import Cloud, Mesh, Node, NodeStation, NodeLoad, UptimeMetric, UnknownNode
+from monitoring.models import Mesh, Node, UnknownNode
+from metrics.models import FailuresMetric, ResourcesMetric, DataUsageMetric
+from .utils import bulk_sync
 
 
-GET_CLOUDS_QUERY = """
-SELECT name, description, lat, lng, created
-FROM clouds;"""
 GET_MESHES_QUERY = """
-SELECT m.name, m.ssid, c.name, m.created
-FROM meshes m
-JOIN clouds c
-ON m.cloud_id = c.id;
+SELECT c.name, c.created
+FROM clouds c
 """
 GET_NODES_AND_APS_QUERY = """
-SELECT m.name, n.name, n.description, n.mac, n.hardware, n.ip, n.last_contact, n.lat, n.lon, n.created, n.config_fetched, n.last_contact_from_ip
+SELECT m.name, n.name, n.description, n.mac, n.hardware, n.ip, n.last_contact_from_ip
 FROM nodes n
 JOIN meshes m
 ON n.mesh_id = m.id;
-SELECT null,   a.name, a.description, a.mac, a.hardware, null, a.last_contact, a.lat, a.lon, a.created, a.config_fetched, a.last_contact_from_ip
-FROM aps a;
+SELECT c.name, a.name, a.description, a.mac, a.hardware, null, a.last_contact_from_ip
+FROM aps a
+JOIN ap_profiles p
+ON a.ap_profile_id = p.id
+JOIN clouds c
+ON p.cloud_id = c.id;
 """
-GET_NODE_AND_AP_STATIONS_QUERY = """
-SELECT n.mac, s.radio_number, s.frequency_band, s.mac, s.tx_bytes, s.rx_bytes, s.tx_packets, s.rx_packets, s.tx_bitrate, s.rx_bitrate, s.tx_failed, s.tx_retries, s.signal_now, s.signal_avg, s.created, s.id
+GET_NODE_AND_AP_BYTES_QUERY = """
+SELECT n.mac, s.tx_bytes, s.rx_bytes, s.created
 FROM node_stations s
 JOIN nodes n
 ON s.node_id = n.id;
-SELECT a.mac, s.radio_number, s.frequency_band, s.mac, s.tx_bytes, s.rx_bytes, s.tx_packets, s.rx_packets, s.tx_bitrate, s.rx_bitrate, s.tx_failed, s.tx_retries, s.signal_now, s.signal_avg, s.created, s.id
+SELECT a.mac, s.tx_bytes, s.rx_bytes, s.created
 FROM ap_stations s
 JOIN aps a
 ON s.ap_id = a.id;
 """
-GET_NODE_AND_AP_LOADS_QUERY = """
-SELECT n.mac, l.mem_total, l.mem_free, l.uptime, l.system_time, l.created, l.id
+GET_NODE_AND_AP_FAILURES_QUERY = """
+SELECT n.mac, s.tx_packets, s.rx_packets, s.tx_failed, s.tx_retries, s.created
+FROM node_stations s
+JOIN nodes n
+ON s.node_id = n.id;
+SELECT a.mac, s.tx_packets, s.rx_packets, s.tx_failed, s.tx_retries, s.created
+FROM ap_stations s
+JOIN aps a
+ON s.ap_id = a.id;
+"""
+GET_NODE_AND_AP_RESOURCES_QUERY = """
+SELECT n.mac, l.mem_total, l.mem_free
 FROM node_loads l
 JOIN nodes n
 ON l.node_id = n.id;
-SELECT a.mac, l.mem_total, l.mem_free, l.uptime, l.system_time, l.created, l.id
+SELECT a.mac, l.mem_total, l.mem_free
 FROM ap_loads l
 JOIN aps a
 ON l.ap_id = a.id;
-"""
-GET_NODE_AND_AP_UPTIME_HISTORY_QUERY = """
-SELECT n.mac, h.node_state h.created, h.id
-FROM node_uptm_histories h
-JOIN nodes n
-ON h.node_id = n.id;
-SELECT a.mac, h.ap_state, h.id
-FROM ap_uptm_histories h
-JOIN aps a
-ON h.ap_id = a.id;
 """
 GET_UNKNOWN_NODES_QUERY = """
 SELECT u.mac, u.vendor, u.from_ip, u.gateway, u.last_contact, u.created, u.name
 FROM unknown_nodes u;
 """
 
-# Make aware, but allow for null values
-make_aware = lambda dt: _make_aware(dt) if dt else None
-
-
-def bulk_sync(ModelType, delete=True):
-    """Log output for sync, with number of added, updated and deleted models."""
-
-    def outer(syncfunc):
-        def inner(cursor):
-            ids_to_delete = set(ModelType.objects.values_list("pk", flat=True))
-            n_added, n_updated = 0, 0
-            for defaults, kwargs in syncfunc(cursor):
-                model, created = ModelType.objects.update_or_create(defaults, **kwargs)
-                if created:
-                    n_added += 1
-                else:
-                    n_updated += 1
-                ids_to_delete.discard(model.pk)
-            n_deleted = 0
-            if delete:
-                n_deleted, _ = ModelType.objects.filter(pk__in=ids_to_delete).delete()
-            print(f"Updated {ModelType.__name__:>12} models "
-                  f"({n_added} created, {n_updated} updated, {n_deleted} deleted)")
-
-        return inner
-
-    return outer
-
-
-@bulk_sync(Cloud)
-def sync_clouds(cursor):
-    cursor.execute(GET_CLOUDS_QUERY)
-    for row in cursor.fetchall():
-        data = dict(
-            description=row[1],
-            lat=row[2],
-            lng=row[3],
-            created=make_aware(row[4]),
-        )
-        yield data, {"name": row[0]}
+TZ = pytz.timezone("Africa/Johannesburg")
 
 
 @bulk_sync(Mesh)
 def sync_meshes(cursor):
+    """Sync Mesh objects from the radiusdesk database."""
     cursor.execute(GET_MESHES_QUERY)
-    for row in cursor.fetchall():
-        data = dict(
-            ssid=row[1],
-            cloud=Cloud.objects.get(name=row[2]),
-            created=make_aware(row[3]),
-        )
-        yield data, {"name": row[0]}
+    for name, created in cursor.fetchall():
+        yield {}, {"name": name}
 
 
 # The nodes that are out of sync mustn't be deleted, they can be potentially added to radiusdesk later
 @bulk_sync(Node, delete=False)
 def sync_nodes(cursor):
+    """Sync Node objects from the radiusdesk database."""
     for result in cursor.execute(GET_NODES_AND_APS_QUERY, multi=True):
-        for row in result.fetchall():
+        for (
+            mesh_name,
+            name,
+            description,
+            mac,
+            hardware,
+            ip,
+            last_contact_from_ip,
+        ) in result.fetchall():
             data = dict(
-                mesh=Mesh.objects.get(name=row[0]) if row[0] else None,
-                name=row[1],
-                description=row[2],
-                mac=row[3],
-                hardware=row[4],
-                ip=row[5],
-                last_contact=make_aware(row[6]),
-                # Don't want these to overwrite our values
-                # lat=row[7],
-                # lon=row[8],
-                created=make_aware(row[9]),
-                config_fetched=make_aware(row[10]),
-                last_contact_from_ip=row[11],
+                mesh=Mesh.objects.get(name=mesh_name),
+                name=name,
+                description=description,
+                mac=mac,
+                hardware=hardware,
+                ip=ip or last_contact_from_ip
             )
-            yield data, {"name": row[1]}
-
-
-@bulk_sync(NodeStation)
-def sync_node_stations(cursor):
-    for result in cursor.execute(GET_NODE_AND_AP_STATIONS_QUERY, multi=True):
-        for row in result.fetchall():
-            data = dict(
-                node=Node.objects.get(mac=row[0]),
-                radio_number=row[1],
-                frequency_band=row[2],
-                mac=row[3],
-                tx_bytes=row[4],
-                rx_bytes=row[5],
-                tx_packets=row[6],
-                rx_packets=row[7],
-                tx_bitrate=row[8],
-                rx_bitrate=row[9],
-                tx_failed=row[10],
-                tx_retries=row[11],
-                signal_now=row[12],
-                signal_avg=row[13],
-                created=make_aware(row[14]),
-            )
-            yield data, {"pk": row[15]}
-
-
-@bulk_sync(NodeLoad)
-def sync_node_loads(cursor):
-    for result in cursor.execute(GET_NODE_AND_AP_LOADS_QUERY, multi=True):
-        for row in result.fetchall():
-            data = dict(
-                node=Node.objects.get(mac=row[0]),
-                mem_total=row[1],
-                mem_free=row[2],
-                uptime=row[3],
-                system_time=row[4],
-                created=make_aware(row[5]),
-            )
-            yield data, {"pk": row[6]}
-
-
-@bulk_sync(UptimeMetric)
-def sync_node_uptime_metrics(cursor):
-    for result in cursor.execute(GET_NODE_AND_AP_UPTIME_HISTORY_QUERY, multi=True):
-        for row in result.fetchall():
-            data = dict(
-                node=Node.objects.get(mac=row[0]),
-                reachable=row[1],
-                loss=0 if row[1] else 100,
-                created=make_aware(row[2]),
-            )
-            yield data, {"pk": row[5]}
+            yield data, {"mac": mac}
 
 
 @bulk_sync(UnknownNode)
 def sync_unknown_nodes(cursor):
+    """Sync UnknownNode objects from the radiusdesk database."""
     cursor.execute(GET_UNKNOWN_NODES_QUERY)
-    for row in cursor.fetchall():
+    for mac, vendor, from_ip, gateway, last_contact, created, name in cursor.fetchall():
         # If there already exists a node with the same MAC, don't
         # create a new UnknownNode
-        if Node.objects.filter(mac=row[0]).exists():
+        if Node.objects.filter(mac=mac).exists():
             continue
         data = dict(
-            vendor=row[1],
-            from_ip=row[2],
-            gateway=row[3],
-            last_contact=make_aware(row[4]),
-            created=make_aware(row[5]),
-            name=row[6]
+            vendor=vendor,
+            from_ip=from_ip,
+            gateway=gateway,
+            last_contact=make_aware(last_contact, TZ),
+            created=make_aware(created, TZ),
+            name=name,
         )
-        yield data, {"mac": row[0]}
+        yield data, {"mac": mac}
+
+
+@bulk_sync(DataUsageMetric)
+def sync_node_bytes_metrics(cursor):
+    """Sync BytesMetric objects from the radiusdesk database."""
+    for result in cursor.execute(GET_NODE_AND_AP_BYTES_QUERY, multi=True):
+        for mac, tx_bytes, rx_bytes, created in result.fetchall():
+            data = dict(
+                node=Node.objects.get(mac=mac),
+                tx_bytes=tx_bytes,
+                rx_bytes=rx_bytes,
+            )
+            yield data, {"created": make_aware(created, TZ)}
+
+
+@bulk_sync(FailuresMetric)
+def sync_node_failures_metrics(cursor):
+    """Sync FailuresMetric objects from the radiusdesk database."""
+    for result in cursor.execute(GET_NODE_AND_AP_FAILURES_QUERY, multi=True):
+        for (
+            node_mac,
+            tx_packets,
+            rx_packets,
+            tx_failed,
+            tx_retries,
+            created,
+        ) in result.fetchall():
+            data = dict(
+                node=Node.objects.get(mac=node_mac),
+                tx_packets=tx_packets,
+                rx_packets=rx_packets,
+                tx_dropped=tx_failed,
+                tx_retries=tx_retries,
+            )
+            yield data, {"created": make_aware(created, TZ)}
+
+
+@bulk_sync(ResourcesMetric)
+def sync_node_resources_metrics(cursor):
+    """Sync NodeLoad objects from the radiusdesk database."""
+    for result in cursor.execute(GET_NODE_AND_AP_RESOURCES_QUERY, multi=True):
+        for node_mac, mem_total, mem_free in result.fetchall():
+            data = dict(
+                node=Node.objects.get(mac=node_mac),
+                memory=mem_free/mem_total*100,
+                cpu=-1,  # Radiusdesk doesn't track CPU usage??
+            )
+            yield data, {}
 
 
 def run():
@@ -219,12 +177,11 @@ def run():
     ) as connection:
         with connection.cursor() as cursor:
             start_time = time.time()
-            sync_clouds(cursor)
             sync_meshes(cursor)
             sync_nodes(cursor)
-            sync_node_stations(cursor)
-            sync_node_loads(cursor)
             sync_unknown_nodes(cursor)
-            # sync_node_uptime_metrics(cursor)
+            sync_node_bytes_metrics(cursor)
+            sync_node_resources_metrics(cursor)
+            sync_node_failures_metrics(cursor)
             elapsed_time = time.time() - start_time
             print(f"Synced with radiusdesk in {elapsed_time:.2f}s")

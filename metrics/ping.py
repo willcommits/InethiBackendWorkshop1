@@ -33,7 +33,5 @@ def ping(ip: str,
         raise ValueError(message) from e
     result = {"reachable": int(loss < 100), "loss": loss}
     if result["reachable"]:
-        result.update(
-            {"rtt_min": float(min), "rtt_avg": float(avg), "rtt_max": float(max)}
-        )
+        result["rtt"] = {"rtt_min": float(min), "rtt_avg": float(avg), "rtt_max": float(max)}
     return result

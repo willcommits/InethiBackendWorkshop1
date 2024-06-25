@@ -1,7 +1,7 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField
 from dynamic_fields.serializers import DynamicFieldsModelSerializer
 
-from .models import Node, Service, Alert, UptimeMetric, NodeStation, Mesh, UnknownNode
+from . import models
 
 
 class MeshSerializer(ModelSerializer):
@@ -9,25 +9,7 @@ class MeshSerializer(ModelSerializer):
 
     class Meta:
         """MeshSerializer metadata."""
-        model = Mesh
-        fields = "__all__"
-
-
-class UptimeMetricSerializer(ModelSerializer):
-    """Serializes node uptime histories from django model to JSON."""
-
-    class Meta:
-        """UptimeMetricSerializer metadata."""
-        model = UptimeMetric
-        fields = "__all__"
-
-
-class NodeStationSerializer(ModelSerializer):
-    """Serializes node stations from django model to JSON."""
-
-    class Meta:
-        """NodeStationSerializer metadata."""
-        model = NodeStation
+        model = models.Mesh
         fields = "__all__"
 
 
@@ -36,19 +18,18 @@ class NodeSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         """Node metadata."""
-        model = Node
+        model = models.Node
         fields = "__all__"
 
-    memory_usage = SerializerMethodField()
-    uptime_metrics = UptimeMetricSerializer(many=True, read_only=True)
-    stations = NodeStationSerializer(many=True, read_only=True)
     neighbours = PrimaryKeyRelatedField(many=True, read_only=True)
+    status = SerializerMethodField()
+    last_contact = SerializerMethodField()
 
-    def get_memory_usage(self, node: Node) -> float:
-        load = node.loads.first()
-        if not load:
-            return -1.0
-        return load.mem_free / load.mem_total
+    def get_status(self, node):
+        return node.status.value
+    
+    def get_last_contact(self, node):
+        return node.last_contact
 
 
 class UnknownNodeSerializer(ModelSerializer):
@@ -56,7 +37,7 @@ class UnknownNodeSerializer(ModelSerializer):
 
     class Meta:
         """UnknownNodeSerializer metadata."""
-        model = UnknownNode
+        model = models.UnknownNode
         fields = "__all__"
 
 
@@ -65,7 +46,7 @@ class ServiceSerializer(ModelSerializer):
 
     class Meta:
         """ServiceSerializer metadata."""
-        model = Service
+        model = models.Service
         fields = "__all__"
 
 
@@ -74,5 +55,5 @@ class AlertSerializer(ModelSerializer):
 
     class Meta:
         """ServiceSerializer metadata."""
-        model = Alert
+        model = models.Alert
         fields = "__all__"

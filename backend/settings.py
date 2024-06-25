@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "monitoring",
+    "metrics",
     "rest_framework",
     "corsheaders",
     "django_keycloak",
@@ -183,7 +184,7 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = False
 
 CELERY_BEAT_SCHEDULE = {
     "ping_schedule": {
-        "task": "monitoring.tasks.run_pings",
+        "task": "metrics.tasks.run_pings",
         # Executes ping every 5 min
         "schedule": timedelta(minutes=5)
     },
