@@ -10,24 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-import environ
 from datetime import timedelta
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
-env = environ.Env(DEBUG=(bool, False), REDIS_HOST=(str, "localhost"))
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-environ.Env.read_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG")
+DEBUG = os.environ["DEBUG"] == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -52,7 +52,48 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "django_keycloak",
+    "users",
+    "payments",
+    "wallet",
 ]
+# Keycloak config
+AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
+LOGIN_URL = "keycloak_login"
+AUTH_USER_MODEL = "django_keycloak.KeycloakUser"
+KEYCLOAK_AUTH = {
+    "URL": os.environ["KEYCLOAK_URL"],
+    "REALM": os.environ["KEYCLOAK_REALM"],
+    "CLIENT_ID": os.environ["KEYCLOAK_CLIENT_ID"],
+    "CLIENT_SECRET": os.environ["KEYCLOAK_CLIENT_SECRET"],
+}
+DRF_KEYCLOAK_AUTH = {
+    "URL": os.environ["KEYCLOAK_URL"],
+    "REALM": os.environ["KEYCLOAK_REALM"],
+    "CLIENT_ID": os.environ["DRF_KEYCLOAK_CLIENT_ID"],
+    "CLIENT_SECRET": None,  # DRF client is public
+}
+# Radiusdesk config
+RD_DB_NAME = "rd"
+RD_DB_USER = "rd"
+RD_DB_PASSWORD = "rd"
+RD_DB_HOST = "localhost"
+RD_DB_PORT = "3306"
+# UNIFI config
+UNIFI_DB_NAME = "ace"
+UNIFI_DB_USER = ""
+UNIFI_DB_PASSWORD = ""
+UNIFI_DB_HOST = "localhost"
+UNIFI_DB_PORT = "27117"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "django_keycloak.authentication.KeycloakDRFAuthentication",
+    ],
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -97,36 +138,17 @@ if DEBUG:
         }
     }
 else:
-    DATABASES = {"default": env.db()}
-
-# Radiusdesk config
-RD_DB_NAME = "rd"
-RD_DB_USER = "rd"
-RD_DB_PASSWORD = "rd"
-RD_DB_HOST = "localhost"
-RD_DB_PORT = "3306"
-# UNIFI config
-UNIFI_DB_NAME = "ace"
-UNIFI_DB_USER = ""
-UNIFI_DB_PASSWORD = ""
-UNIFI_DB_HOST = "localhost"
-UNIFI_DB_PORT = "27117"
-
-# Keycloak config
-AUTHENTICATION_BACKENDS = ["django_keycloak.backends.KeycloakAuthorizationCodeBackend"]
-AUTH_USER_MODEL = "django_keycloak.KeycloakUser"
-KEYCLOAK_AUTH = {
-    "URL": env("KEYCLOAK_URL"),
-    "REALM": env("KEYCLOAK_REALM"),
-    "CLIENT_ID": env("KEYCLOAK_CLIENT_ID"),
-    "CLIENT_SECRET": env("KEYCLOAK_CLIENT_SECRET"),
-}
-DRF_KEYCLOAK_AUTH = {
-    "URL": env("KEYCLOAK_URL"),
-    "REALM": env("KEYCLOAK_REALM"),
-    "CLIENT_ID": env("DRF_KEYCLOAK_CLIENT_ID"),
-    "CLIENT_SECRET": None,
-}
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": "manage",
+            "USER": "inethi",
+            "PASSWORD": "iNethi2023#",
+            #'HOST': '127.0.0.1', # this works when running python locally
+            "HOST": "inethi-manage-mysql",
+            "PORT": "3306",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -145,20 +167,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
-PROMETHEUS_USERNAME = env("PROMETHEUS_USERNAME")
-PROMETHEUS_PASSWORD = env("PROMETHEUS_PASSWORD")
-PROMETHEUS_URL = env("PROMETHEUS_URL")
-
-REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "django_keycloak.authentication.KeycloakDRFAuthentication",
-    ],
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -181,8 +189,9 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Celery config
-CELERY_BROKER_URL = f"redis://{env('REDIS_HOST')}:6379/0"
-CELERY_RESULT_BACKEND = f"redis://{env('REDIS_HOST')}:6379/0"
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:6379/0"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:6379/0"
 # Celery TIME_ZONE should be equal to django TIME_ZONE
 # In order to schedule run_iperf3_checks on the correct time intervals
 CELERY_TIMEZONE = TIME_ZONE
@@ -203,5 +212,51 @@ CELERY_BEAT_SCHEDULE = {
         "task": "monitoring.tasks.run_syncunifi",
         # Executes db sync every 15 min
         "schedule": timedelta(minutes=15),
+    },
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console_info": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout",  # Use standard output rather than standard error
+        },
+        "file_error": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": "django_errors.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "": {  # root logger
+            "handlers": ["console_info", "file_error"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django": {
+            "handlers": ["console_info", "file_error"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "general": {
+            "handlers": ["console_info", "file_error"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
