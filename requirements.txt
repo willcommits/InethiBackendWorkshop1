@@ -26,7 +26,7 @@ deprecation==2.1.0
 Django==5.0.6
 django-cors-headers==4.3.1
 django-environ==0.11.2
--e git+https://github.com/ErikPolzin/django-keycloak.git@fc206dcdd05268e04161a7be7543b41238d74654#egg=django_keycloak
+django-keycloak-admin==0.0.1
 django-rest-framework==0.1.0
 djangorestframework==3.15.1
 dnspython==2.6.1
