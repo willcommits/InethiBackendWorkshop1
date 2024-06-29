@@ -26,10 +26,12 @@ def sync_meshes(client):
 def sync_nodes(client):
     """Sync Node objects from the unifi database."""
     for device in client.ace.device.find():
+        adoption_details = client.ace.event.find_one({"key": "EVT_AP_Adopted", "ap": device["mac"]})
+        name = adoption_details["ap_name"] if adoption_details else device["model"]
         adopt_time = make_aware(datetime.fromtimestamp(device["adopted_at"] / 1e3), TZ)
         data = dict(
             mesh=Mesh.objects.get(name=device["last_connection_network_name"].lower()),
-            name=device["model"],
+            name=name,
             description="",
             mac=device["mac"],
             hardware=device["model"],
