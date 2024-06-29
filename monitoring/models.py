@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db import models
 
+from metrics.models import UptimeMetric
+
 
 class Mesh(models.Model):
     """Mesh consisting of nodes."""
@@ -38,7 +40,7 @@ class Node(models.Model):
     @property
     def status(self) -> Status:
         """Node status, based of the last uptime metric."""
-        last_uptime_metric = self.uptime_metrics.order_by("-created").first()
+        last_uptime_metric = UptimeMetric.objects.filter(mac=self.mac).order_by("-created").first()
         now = timezone.now()
         if last_uptime_metric is None:
             return Node.Status.UNKNOWN
@@ -52,7 +54,7 @@ class Node(models.Model):
     @property
     def last_contact(self) -> datetime | None:
         """Datetime of last contact."""
-        last_uptime_metric = self.uptime_metrics.filter(reachable=True).order_by("-created").first()
+        last_uptime_metric = UptimeMetric.objects.filter(mac=self.mac).filter(reachable=True).order_by("-created").first()
         if last_uptime_metric is None:
             return None
         return last_uptime_metric.created

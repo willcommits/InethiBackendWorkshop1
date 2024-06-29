@@ -15,7 +15,7 @@ class FilterByDeviceMacMixin:
         qs = super().filter_queryset(qs)
         mac = self.request.query_params.get(self.MAC_FIELD)
         if mac is not None:
-            qs = qs.filter(node__mac=mac)
+            qs = qs.filter(mac=mac)
         return qs
 
 
@@ -28,11 +28,12 @@ class FilterByMinTimeMixin:
         """Filter against a 'min_time' parameter in the request query."""
         qs = super().filter_queryset(qs)
         min_time = self.request.query_params.get(self.MIN_TIME_FIELD)
+        if not min_time:
+            return qs
         try:
             min_time_int = int(min_time)
         except ValueError:
             return qs
-        print(datetime.fromtimestamp(min_time_int))
         return qs.filter(created__gt=datetime.fromtimestamp(min_time_int))
 
 

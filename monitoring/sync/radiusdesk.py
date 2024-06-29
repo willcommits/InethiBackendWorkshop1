@@ -125,7 +125,7 @@ def sync_node_bytes_metrics(cursor):
     for result in cursor.execute(GET_NODE_AND_AP_BYTES_QUERY, multi=True):
         for mac, tx_bytes, rx_bytes, created in result.fetchall():
             data = dict(
-                node=Node.objects.get(mac=mac),
+                mac=mac,
                 tx_bytes=tx_bytes,
                 rx_bytes=rx_bytes,
             )
@@ -145,7 +145,7 @@ def sync_node_failures_metrics(cursor):
             created,
         ) in result.fetchall():
             data = dict(
-                node=Node.objects.get(mac=node_mac),
+                mac=node_mac,
                 tx_packets=tx_packets,
                 rx_packets=rx_packets,
                 tx_dropped=tx_failed,
@@ -160,7 +160,7 @@ def sync_node_resources_metrics(cursor):
     for result in cursor.execute(GET_NODE_AND_AP_RESOURCES_QUERY, multi=True):
         for node_mac, mem_total, mem_free in result.fetchall():
             data = dict(
-                node=Node.objects.get(mac=node_mac),
+                mac=node_mac,
                 memory=mem_free/mem_total*100,
                 cpu=-1,  # Radiusdesk doesn't track CPU usage??
             )

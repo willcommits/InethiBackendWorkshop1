@@ -1,8 +1,6 @@
 from django.db import models
 from django.utils import timezone
 
-from monitoring.models import Node
-
 
 class Metric(models.Model):
     """Base class for Metric objects."""
@@ -23,9 +21,7 @@ class Metric(models.Model):
 class ResourcesMetric(Metric):
     """Metric for system resources (memor, cpu usage)."""
 
-    node = models.ForeignKey(
-        Node, on_delete=models.CASCADE, related_name="resources_metrics"
-    )
+    mac = models.CharField(max_length=100)
     memory = models.FloatField()
     cpu = models.FloatField()
 
@@ -36,9 +32,7 @@ class ResourcesMetric(Metric):
 class UptimeMetric(Metric):
     """Metric for uptime, gathered during periodic pings."""
 
-    node = models.ForeignKey(
-        Node, on_delete=models.CASCADE, related_name="uptime_metrics"
-    )
+    mac = models.CharField(max_length=100)
     reachable = models.BooleanField()
     loss = models.IntegerField()
 
@@ -49,7 +43,7 @@ class UptimeMetric(Metric):
 class RTTMetric(Metric):
     """Metric for round trip time, gathered during periodic pings."""
 
-    node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="rtt_metrics")
+    mac = models.CharField(max_length=100)
     rtt_min = models.FloatField(null=True, blank=True)
     rtt_avg = models.FloatField(null=True, blank=True)
     rtt_max = models.FloatField(null=True, blank=True)
@@ -61,9 +55,7 @@ class RTTMetric(Metric):
 class DataUsageMetric(Metric):
     """Metric for a node's data usage."""
 
-    node = models.ForeignKey(
-        Node, on_delete=models.CASCADE, related_name="data_usage_metrics"
-    )
+    mac = models.CharField(max_length=100)
     tx_bytes = models.BigIntegerField()
     rx_bytes = models.BigIntegerField()
 
@@ -74,9 +66,7 @@ class DataUsageMetric(Metric):
 class FailuresMetric(Metric):
     """Metric for wifi failures."""
 
-    node = models.ForeignKey(
-        Node, on_delete=models.CASCADE, related_name="failures_metrics"
-    )
+    mac = models.CharField(max_length=100)
     tx_packets = models.BigIntegerField()
     rx_packets = models.BigIntegerField()
     tx_dropped = models.IntegerField(null=True, blank=True)

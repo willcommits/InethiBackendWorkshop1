@@ -48,7 +48,7 @@ def sync_node_data_usage_metrics(client):
     for ap in aps:
         ap_time = make_aware(datetime.fromtimestamp(ap["time"] / 1e3), TZ)
         data = dict(
-            node=Node.objects.get(mac=ap["ap"]),
+            mac=ap["ap"],
             tx_bytes=ap.get("tx_bytes"),
             rx_bytes=ap.get("rx_bytes"),
         )
@@ -62,7 +62,7 @@ def sync_node_failures_metrics(client):
     for ap in aps:
         ap_time = make_aware(datetime.fromtimestamp(ap["time"] / 1e3), TZ)
         data = dict(
-            node=Node.objects.get(mac=ap["ap"]),
+            mac=ap["ap"],
             tx_packets=ap.get("tx_packets"),
             rx_packets=ap.get("rx_packets"),
             tx_dropped=ap.get("tx_dropped"),
@@ -81,7 +81,7 @@ def sync_node_resources_metrics(client):
     for ap in aps:
         ap_time = make_aware(datetime.fromtimestamp(ap["time"] / 1e3), TZ)
         data = dict(
-            node=Node.objects.get(mac=ap["ap"]),
+            mac=ap["ap"],
             memory=ap.get("mem"),
             cpu=ap.get("cpu"),
         )

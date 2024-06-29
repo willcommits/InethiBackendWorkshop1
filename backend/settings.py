@@ -137,6 +137,10 @@ if DEBUG:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
+        },
+        "metrics_db": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "metrics.sqlite3",
         }
     }
 else:
@@ -151,6 +155,8 @@ else:
             "PORT": "3306",
         }
     }
+
+DATABASE_ROUTERS = ["backend.routers.MetricsRouter"]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
