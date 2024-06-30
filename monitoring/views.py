@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Node
+from .checks import CheckStatus
 from . import models
 from . import serializers
 
@@ -14,7 +15,7 @@ def overview(request):
         "n_nodes": Node.objects.count(),
         "n_positioned_nodes": Node.objects.filter(lat__isnull=False, lon__isnull=False).count(),
         "n_unknown_nodes": models.UnknownNode.objects.count(),
-        "n_ok_nodes": len([n for n in Node.objects.all() if n.status == Node.Status.OK]),  # TODO very inefficient
+        "n_ok_nodes": len([n for n in Node.objects.all() if n.check_results.status() == CheckStatus.OK]),  # TODO very inefficient
     })
 
 
