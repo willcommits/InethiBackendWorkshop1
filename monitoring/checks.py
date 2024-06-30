@@ -69,9 +69,9 @@ class CheckResults(list[CheckResult]):
         """Check whether fewer than half failed."""
         return self.num_failed <= len(self) / 2
 
-    def more_than_half_failed(self) -> bool:
-        """Check whether more than half of the checks failed."""
-        return self.num_failed > len(self) / 2
+    def more_than_half_failed_but_not_all(self) -> bool:
+        """Check whether more than half of the checks failed (but not all)."""
+        return self.num_failed > len(self) / 2 and self.num_passed != 0
 
     def all_failed(self) -> bool:
         """Check whether all of the checks failed."""
@@ -83,8 +83,9 @@ class CheckResults(list[CheckResult]):
             return CheckStatus.OK
         if self.fewer_than_half_failed():
             return CheckStatus.DECENT
-        if self.more_than_half_failed():
+        if self.more_than_half_failed_but_not_all():
             return CheckStatus.WARNING
+        # All failed
         return CheckStatus.CRITICAL
 
     def serialize(self) -> list[dict]:
