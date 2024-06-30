@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField
 from dynamic_fields.serializers import DynamicFieldsModelSerializer
 
@@ -24,12 +25,17 @@ class NodeSerializer(DynamicFieldsModelSerializer):
     neighbours = PrimaryKeyRelatedField(many=True, read_only=True)
     status = SerializerMethodField()
     last_contact = SerializerMethodField()
+    checks = SerializerMethodField()
 
-    def get_status(self, node):
-        return node.status.value
-    
-    def get_last_contact(self, node):
-        return node.last_contact
+    def get_status(self, node: models.Node) -> str:
+        return node.check_results.status().value
+
+    def get_last_contact(self, node: models.Node) -> datetime | None:
+        return node.get_last_contacted_time()
+
+    def get_checks(self, node: models.Node) -> list[dict]:
+        """Run checks defined in settings.DEVICE_CHECKS"""
+        return node.check_results.serialize()
 
 
 class UnknownNodeSerializer(ModelSerializer):

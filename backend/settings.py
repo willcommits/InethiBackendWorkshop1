@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from datetime import timedelta
+from django.utils import timezone
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -87,6 +88,59 @@ UNIFI_DB_PASSWORD = ""
 UNIFI_DB_HOST = "localhost"
 UNIFI_DB_PORT = "27117"
 
+DEVICE_CHECKS = [
+    {
+        "title": "CPU Usage",
+        "key": "cpu",
+        "func": lambda v: v < 80,
+        "feedback": {
+            None: "No CPU usage recorded",
+            False: "CPU usage is high",
+            True: "CPU usage falls in an acceptable range",
+        },
+    },
+    {
+        "title": "Memory Usage",
+        "key": "mem",
+        "func": lambda v: v < 70,
+        "feedback": {
+            None: "No memory usage recorded",
+            False: "Memory usage is high",
+            True: "Memory usage falls in an acceptable range",
+        },
+    },
+    {
+        "title": "Contacted",
+        "key": "is_contacted",
+        "func": lambda v: bool(v),
+        "feedback": {
+            None: "Device has never been contacted",
+            False: "Device has never been contacted",
+            True: "Device has been contacted at least once",
+        },
+    },
+    {
+        "title": "Active",
+        "key": "last_contacted_time",
+        "func": lambda v: timezone.now() - v < timedelta(hours=1),
+        "feedback": {
+            None: "Device has not been contacted",
+            False: "Device is not active",
+            True: "Device is active",
+        },
+    },
+    {
+        "title": "RTT",
+        "key": "rtt",
+        "func": lambda v: v < 40,
+        "feedback": {
+            None: "No RTT data",
+            False: "Took too long to return a response",
+            True: "Response time is acceptable",
+        },
+    },
+]
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -141,7 +195,7 @@ if DEBUG:
         "metrics_db": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "metrics.sqlite3",
-        }
+        },
     }
 else:
     DATABASES = {
