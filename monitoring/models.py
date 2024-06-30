@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.utils.functional import cached_property
 from django.db import models
+from macaddress.fields import MACAddressField
 
 from metrics.models import UptimeMetric, ResourcesMetric, RTTMetric
 from .checks import CheckResults
@@ -18,7 +19,7 @@ class Node(models.Model):
     """Database table for network devices."""
 
     # Required Fields
-    mac = models.CharField(max_length=255, primary_key=True)
+    mac = MACAddressField(primary_key=True)
     name = models.CharField(max_length=255)
     mesh = models.ForeignKey(Mesh, on_delete=models.CASCADE)
     # Optional Fields
@@ -78,7 +79,7 @@ class Node(models.Model):
 class UnknownNode(models.Model):
     """Nodes that haven't been adopted yet."""
 
-    mac = models.CharField(max_length=255, primary_key=True)
+    mac = MACAddressField(primary_key=True)
     name = models.CharField(max_length=255)
     ip = models.CharField(max_length=15)
     created = models.DateTimeField(auto_now_add=True)

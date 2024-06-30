@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from macaddress.fields import MACAddressField
 
 
 class Metric(models.Model):
@@ -16,14 +17,14 @@ class Metric(models.Model):
         super().save(*args, **kwargs)
 
     created = models.DateTimeField()
+    mac = MACAddressField()
 
 
 class ResourcesMetric(Metric):
     """Metric for system resources (memor, cpu usage)."""
 
-    mac = models.CharField(max_length=100)
     memory = models.FloatField()
-    cpu = models.FloatField()
+    cpu = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return f"Metric: Resources [{self.created}]"
@@ -32,7 +33,6 @@ class ResourcesMetric(Metric):
 class UptimeMetric(Metric):
     """Metric for uptime, gathered during periodic pings."""
 
-    mac = models.CharField(max_length=100)
     reachable = models.BooleanField()
     loss = models.IntegerField()
 
@@ -43,7 +43,6 @@ class UptimeMetric(Metric):
 class RTTMetric(Metric):
     """Metric for round trip time, gathered during periodic pings."""
 
-    mac = models.CharField(max_length=100)
     rtt_min = models.FloatField(null=True, blank=True)
     rtt_avg = models.FloatField(null=True, blank=True)
     rtt_max = models.FloatField(null=True, blank=True)
@@ -55,7 +54,6 @@ class RTTMetric(Metric):
 class DataUsageMetric(Metric):
     """Metric for a node's data usage."""
 
-    mac = models.CharField(max_length=100)
     tx_bytes = models.BigIntegerField()
     rx_bytes = models.BigIntegerField()
 
@@ -66,7 +64,6 @@ class DataUsageMetric(Metric):
 class FailuresMetric(Metric):
     """Metric for wifi failures."""
 
-    mac = models.CharField(max_length=100)
     tx_packets = models.BigIntegerField()
     rx_packets = models.BigIntegerField()
     tx_dropped = models.IntegerField(null=True, blank=True)

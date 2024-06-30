@@ -3,14 +3,19 @@
 ## Installation
 
 Set up a virtual environment with by running
+
 ```bash
 python -m venv .venv
 ```
+
 from the command line. Now you can activate it with
+
 ```bash
 source .venv/bin/activate
 ```
+
 Next, install the dependencies (Django, Jose etc)
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -48,6 +53,7 @@ The CommuNethi app is designed to run alongside a RadiusDesk server. It provides
 First follow the [instructions for running radiusdesk in a docker container]('https://www.radiusdesk.com/wiki24/install_docker'). Then make sure that the mariadb container exposes its database at port 3306, so that django can connect to it. This may involve editing radiusdesk's `docker-compose.yml` file.
 
 Double check the database is exposed by running
+
 ```bash
 mysql -h localhost -P 3306 -u rd --password=rd
 ```
@@ -57,36 +63,49 @@ mysql -h localhost -P 3306 -u rd --password=rd
 ## Running the backend
 
 If you're running the backend for the first time, you will have to migrate changes to the database with
+
 ```bash
-python manage.py migrate
+python manage.py migrate --database=default
+python manage.py migrate --database=metrics_db
 ```
 
 You need to configure the backend to communicate with the keycloak server by registering both frontend and backend clients in the .env file, for example:
+
 ```bash
 KEYCLOAK_URL="http://localhost:8000"
 KEYCLOAK_REALM="inethi-global-services"
 KEYCLOAK_CLIENT_ID="manage-backend"
-DRF_KEYCLOAK_CLIENT_ID="manage-ui"
-DRF_KEYCLOAK_CLIENT_SECRET=
 KEYCLOAK_CLIENT_SECRET="<CLIENT_SECRET>"
+DRF_KEYCLOAK_CLIENT_ID="manage-ui"
 ```
 
 Now you can run the server, using
+
 ```bash
 python manage.py runserver
 ```
 
 The base url should redirect you to the keycloak server, where you can log in using the credentials you set up initially. After that, you should be able to access the admin site.
 
+### Running Celery beat
+
+The backend sends periodic pings to its registered devices using [Celery]('https://docs.celeryq.dev/en/stable/getting-started/introduction.html'). To schedule periodic tasks and start a worker process, run
+
+```bash
+python -m celery -A backend beat -l info
+python -m celery -A backend worker -l info
+```
 
 ## Running in a Docker container
 
 ### Prerequisites
+
 Ensure you have docker and python on your system.
 
 Add your keycloak public key in the [keys](keys) folder and add a .env file in [backend](backend) as per [example.env](backend/backend/.env.example)
 
 ### Running the code
+
 1. `pip install -r requirements.txt`
 2. `docker compose build --no-cache`
 3. `docker compose up inethi-manage-mysql -d`
