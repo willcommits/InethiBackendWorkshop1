@@ -59,7 +59,15 @@ class ServiceSerializer(ModelSerializer):
 class AlertSerializer(ModelSerializer):
     """Serializes Alert objects from django model to JSON."""
 
+    node = SerializerMethodField()
+
     class Meta:
         """ServiceSerializer metadata."""
         model = models.Alert
         fields = "__all__"
+
+    def get_node(self, alert):
+        # The default PrimaryKeyRelatedField doesn't work, because Node's primary
+        # key is a MacAddressField, and rest_framework has trouble serializing
+        # that to JSON. As a workaround, I manually stringify it here.
+        return str(alert.node.mac)

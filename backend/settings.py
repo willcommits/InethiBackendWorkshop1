@@ -272,9 +272,16 @@ CELERY_BEAT_SCHEDULE = {
     },
     "syncunifi_schedule": {
         "task": "monitoring.tasks.run_syncunifi",
-        # Executes db sync every 15 min
-        "schedule": timedelta(minutes=15),
+        # Executes db sync every 15 min. Slightly
+        # offset from syncrd_schedule to prevent
+        # database concurrency issues
+        "schedule": timedelta(minutes=14),
     },
+    "alerts_schedule": {
+        "task": "monitoring.tasks.generate_alerts",
+        # Executes alert monitoring every 2 min
+        "schedule": timedelta(minutes=2)
+    }
 }
 
 LOGGING = {

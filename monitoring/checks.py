@@ -17,6 +17,16 @@ class CheckStatus(enum.Enum):
     DECENT = "Decent"
     OK = "Ok"
 
+    def alert_level(self) -> int:
+        """Convert status to an alert level."""
+        if self == CheckStatus.OK:
+            return 0
+        if self == CheckStatus.DECENT:
+            return 1
+        if self == CheckStatus.WARNING:
+            return 2
+        return 3
+
 
 @dataclass
 class CheckResult:
@@ -87,6 +97,10 @@ class CheckResults(list[CheckResult]):
             return CheckStatus.WARNING
         # All failed
         return CheckStatus.CRITICAL
+
+    def alert_summary(self) -> str:
+        """Summary of failing checks, used to generate alerts."""
+        return "\n".join(f"{c.title}: {c.feedback}" for c in self if not c.passed)
 
     def serialize(self) -> list[dict]:
         """Serialize results as a list of primitive dicts."""

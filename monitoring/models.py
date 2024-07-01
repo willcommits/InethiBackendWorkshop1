@@ -4,7 +4,7 @@ from django.db import models
 from macaddress.fields import MACAddressField
 
 from metrics.models import UptimeMetric, ResourcesMetric, RTTMetric
-from .checks import CheckResults
+from .checks import CheckResults, CheckStatus
 
 
 class Mesh(models.Model):
@@ -109,20 +109,25 @@ class Service(models.Model):
 class Alert(models.Model):
     """Alert sent to network managers."""
 
-    ALERT_CATEGORIES = (
-        ("node_down", "Node Down"),
-        ("node_up", "Node Up"),
-        ("unknown", "Unknown"),
+    ALERT_LEVELS = (
+        (3, "Critical"),
+        (2, "Warning"),
+        (1, "Decent"),
+        (0, "OK"),
     )
 
-    ALERT_TYPES = (
-        ("error", "Error"),
-        ("warning", "Warning"),
-        ("info", "Info"),
-        ("success", "Success"),
-    )
-
-    category = models.CharField(max_length=20, choices=ALERT_CATEGORIES)
-    type = models.CharField(max_length=10, choices=ALERT_TYPES)
-    text = models.CharField(max_length=100)
+    level = models.SmallIntegerField(choices=ALERT_LEVELS)
+    text = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
+    resolved = models.BooleanField(default=False)
+    node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="alerts")
+
+    @classmethod
+    def from_status(cls, node: Node, status: CheckStatus) -> "Alert":
+        """Generate an alert from a node's status."""
+        return cls(level=status.alert_level(),
+                   text=node.check_results.alert_summary(),
+                   node=node)
+
+    def __str__(self):
+        return f"Alert for {self.node} level={self.level} [{self.created}]"
