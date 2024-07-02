@@ -120,13 +120,13 @@ DEVICE_CHECKS = [
         },
     },
     {
-        "title": "Active",
+        "title": "Online",
         "key": "last_contacted_time",
         "func": lambda v: timezone.now() - v < timedelta(hours=1),
         "feedback": {
-            None: "Device has not been contacted",
-            False: "Device is not active",
-            True: "Device is active",
+            None: "Device has not been contacted yet",
+            False: "Device is offline",
+            True: "Device is online",
         },
     },
     {
