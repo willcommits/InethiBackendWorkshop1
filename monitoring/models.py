@@ -129,5 +129,14 @@ class Alert(models.Model):
                    text=node.check_results.alert_summary(),
                    node=node)
 
+    def type(self) -> str:
+        """Alert type name."""
+        return {
+            3: "Critical",
+            2: "Warning",
+            1: "Decent",
+            0: "OK"
+        }[self.level]
+
     def __str__(self):
         return f"Alert for {self.node} level={self.level} [{self.created}]"
