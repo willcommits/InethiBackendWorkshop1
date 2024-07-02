@@ -7,7 +7,7 @@ def ping(ip: str,
          nbytes: int = 56,
          timeout: int = 800) -> dict:
     command = [
-        "fping",
+        "/bin/fping",
         "-e",  # show elapsed (round-trip) time of packets
         "-c %s" % count,  # count of pings to send to each target,
         "-p %s" % interval,  # interval between sending pings(in ms)
