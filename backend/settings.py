@@ -29,8 +29,8 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ["DEBUG"] == "True"
-
-ALLOWED_HOSTS = ["*"]
+CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = [".vercel.app"]
 
 # Update CSRF_TRUSTED_ORIGINS to include your React app's domain
 CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
@@ -143,18 +143,18 @@ DEVICE_CHECKS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        #  "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "django_keycloak.authentication.KeycloakDRFAuthentication",
+        #  "rest_framework.authentication.SessionAuthentication",
+        #  "django_keycloak.authentication.KeycloakDRFAuthentication",
     ],
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
